@@ -13,25 +13,37 @@ import br.study.ebah.miguel.cdsCatalog.elements.Song;
 
 /**
  * @author miguel
- *
+ * 
  */
-public class InMemoryDiscRW extends InMemoryDisc implements IsWritable{
+public class InMemoryDiscRW extends InMemoryDisc implements IsWritable {
 
+	/*
+	 * 
+	 */
 	InMemoryDiscRW(Disc other) {
 		super(other);
 	}
-	
+
+	/*
+	 * 
+	 */
 	InMemoryDiscRW(String name, Date date) {
 		super(name, date);
 	}
-	
+
+	/*
+	 * 
+	 * @see
+	 * br.study.ebah.miguel.cdsCatalog.actions.IsWritable#asAddable(java.lang
+	 * .Class)
+	 */
 	@SuppressWarnings("unchecked")
-	public <T> Writable<T> asAddable(Class<T> type) throws IllegalArgumentException {
+	public <T> Writable<T> asAddable(Class<T> type)
+			throws IllegalArgumentException {
 		if (type == Song.class) {
 			return (Writable<T>) new Writable<Song>() {
 
 				public void add(Song t) {
-					// InMemoryArtist.this.
 					songs.add(t);
 				}
 
@@ -49,6 +61,9 @@ public class InMemoryDiscRW extends InMemoryDisc implements IsWritable{
 		}
 	}
 
+	/*
+	 * 
+	 */
 	public void setMain(Artist artist) {
 		if (this.artists.contains(artist)) {
 			this.mainArtist = artist;
@@ -58,5 +73,5 @@ public class InMemoryDiscRW extends InMemoryDisc implements IsWritable{
 		}
 
 	}
-	
+
 }

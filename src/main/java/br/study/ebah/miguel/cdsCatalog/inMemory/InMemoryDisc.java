@@ -23,6 +23,9 @@ public class InMemoryDisc implements Disc {
 	Artist mainArtist;
 	private final Date releaseDate;
 
+	/*
+	 * 
+	 */
 	InMemoryDisc(String name, Date date) {
 		this.name = name;
 
@@ -32,6 +35,9 @@ public class InMemoryDisc implements Disc {
 		this.releaseDate = date;
 	}
 
+	/*
+	 * 
+	 */
 	InMemoryDisc(Disc other) {
 		this.name = other.getName();
 
@@ -51,6 +57,7 @@ public class InMemoryDisc implements Disc {
 	}
 
 	/*
+	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getName()
 	 */
 	public String getName() {
@@ -58,6 +65,7 @@ public class InMemoryDisc implements Disc {
 	}
 
 	/*
+	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getArtists()
 	 */
 	public Iterable<Artist> getArtists() {
@@ -65,6 +73,7 @@ public class InMemoryDisc implements Disc {
 	}
 
 	/*
+	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getMainArtist()
 	 */
 	public Artist getMainArtist() {
@@ -72,6 +81,7 @@ public class InMemoryDisc implements Disc {
 	}
 
 	/*
+	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getSongs()
 	 */
 	public Iterable<Song> getSongs() {
@@ -82,18 +92,23 @@ public class InMemoryDisc implements Disc {
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getReleaseDate()
 	 */
 	public Date getReleaseDate() {
-		// return new Date(this.date.getTime());
 		return (Date) this.releaseDate.clone();
 	}
 
-
-	
+	/*
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		// TODO Override Object method
 		return super.equals(obj);
 	}
-	
+
+	/*
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		// TODO Override Object method

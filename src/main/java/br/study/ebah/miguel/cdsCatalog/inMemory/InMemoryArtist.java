@@ -22,21 +22,25 @@ public class InMemoryArtist implements Artist {
 	final List<Disc> knownDiscs;
 	final List<Disc> knownMainDiscs;
 	private final Date birthday;
-
+	
+	/*
+	 * 
+	 */
 	public InMemoryArtist(String name, Date birthday) {
 		this.name = name;
 
 		this.knownSongs = Collections.synchronizedList(new ArrayList<Song>());
-		// Collections.synchronizedList ou Vector<Song>
-		// se getKnownSongs retornar List
-
 		this.knownDiscs = Collections.synchronizedList(new ArrayList<Disc>());
 		this.knownMainDiscs = Collections
 				.synchronizedList(new ArrayList<Disc>());
+		
 		this.birthday = birthday;
 
 	}
-
+	
+	/*
+	 * 
+	 */
 	public InMemoryArtist(Artist other) {
 		this.name = other.getName();
 
@@ -64,8 +68,6 @@ public class InMemoryArtist implements Artist {
 	/*
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getName()
-	 * 
-	 * final -> classe filha não pode dar Override
 	 */
 	public final String getName() {
 		return this.name;
@@ -101,16 +103,23 @@ public class InMemoryArtist implements Artist {
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getBirthday()
 	 */
 	public Date getBirthday() {
-		// return new Date(this.date.getTime());
 		return (Date) this.birthday.clone();
 	}
 	
+	/*
+	 * 
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		// TODO Override Object method
 		return super.equals(obj);
 	}
 	
+	/*
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		// TODO Override Object method

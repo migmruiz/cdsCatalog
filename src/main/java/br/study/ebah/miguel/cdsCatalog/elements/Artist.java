@@ -10,16 +10,29 @@ import java.util.Date;
  * 
  */
 public interface Artist {
+	/*
+	 * 
+	 */
 	public String getName();
 
+	/*
+	 * 
+	 */
 	public Iterable<Song> getKnownSongs();
 
+	/*
+	 * 
+	 */
 	public Iterable<Disc> getKnownDiscs();
 
+	/*
+	 * 
+	 */
 	public Iterable<Disc> getKnownMainDiscs();
 
-	// public void setMain(Disc disc);
-
+	/*
+	 * 
+	 */
 	public Date getBirthday();
 
 }

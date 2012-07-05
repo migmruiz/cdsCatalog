@@ -10,14 +10,29 @@ import java.util.Date;
  * 
  */
 public interface Song {
+	/*
+	 * 
+	 */
 	public Composer getComposer();
 
+	/*
+	 * 
+	 */
 	public String getLyrics();
 
+	/*
+	 * 
+	 */
 	public Date getFirstReleaseDate();
-	
+
+	/*
+	 * 
+	 */
 	public Iterable<Artist> getKnownArtists();
-	
+
+	/*
+	 * 
+	 */
 	public Iterable<Disc> getKnownDiscs();
 
 }

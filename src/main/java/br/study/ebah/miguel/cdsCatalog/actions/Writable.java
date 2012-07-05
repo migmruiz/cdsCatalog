@@ -8,6 +8,9 @@ package br.study.ebah.miguel.cdsCatalog.actions;
  *
  */
 public interface Writable<T> {
+	/*
+	 * 
+	 */
 	void add(T type);
 
 }
