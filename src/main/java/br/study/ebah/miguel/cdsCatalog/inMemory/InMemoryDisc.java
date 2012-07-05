@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import br.study.ebah.miguel.cdsCatalog.actions.Addable;
 import br.study.ebah.miguel.cdsCatalog.elements.Artist;
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
 import br.study.ebah.miguel.cdsCatalog.elements.Song;
@@ -19,9 +18,9 @@ import br.study.ebah.miguel.cdsCatalog.elements.Song;
  */
 public class InMemoryDisc implements Disc {
 	private final String name;
-	private final List<Song> songs;
-	private final List<Artist> artists;
-	private Artist mainArtist;
+	final List<Song> songs;
+	final List<Artist> artists;
+	Artist mainArtist;
 	private final Date releaseDate;
 
 	InMemoryDisc(String name, Date date) {
@@ -87,38 +86,18 @@ public class InMemoryDisc implements Disc {
 		return (Date) this.releaseDate.clone();
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Addable<T> asAddable(Class<T> type) throws Throwable {
-		if (type == Song.class) {
-			return (Addable<T>) new Addable<Song>() {
 
-				public void add(Song t) {
-					// InMemoryArtist.this.
-					songs.add(t);
-				}
-
-			};
-		} else if (type == Artist.class) {
-			return (Addable<T>) new Addable<Artist>() {
-
-				public void add(Artist t) {
-					artists.add(t);
-				}
-
-			};
-		} else {
-			throw new Exception();
-		}
+	
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Override Object method
+		return super.equals(obj);
 	}
-
-	public void setMain(Artist artist) {
-		if (this.artists.contains(artist)) {
-			this.mainArtist = artist;
-		} else {
-			throw new IllegalArgumentException(
-					"This disc is unknown to this artist.");
-		}
-
+	
+	@Override
+	public String toString() {
+		// TODO Override Object method
+		return super.toString();
 	}
 
 }

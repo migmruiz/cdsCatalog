@@ -5,8 +5,6 @@ package br.study.ebah.miguel.cdsCatalog.elements;
 
 import java.util.Date;
 
-import br.study.ebah.miguel.cdsCatalog.actions.Addable;
-
 /**
  * @author miguel
  * 
@@ -20,10 +18,8 @@ public interface Artist {
 
 	public Iterable<Disc> getKnownMainDiscs();
 
-	public void setMain(Disc disc);
+	// public void setMain(Disc disc);
 
 	public Date getBirthday();
-
-	public <T> Addable<T> asAddable(Class<T> type) throws Throwable;
 
 }
