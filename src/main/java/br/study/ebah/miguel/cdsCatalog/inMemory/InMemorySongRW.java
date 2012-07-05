@@ -8,50 +8,34 @@ import java.util.Date;
 import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.elements.Artist;
+import br.study.ebah.miguel.cdsCatalog.elements.Composer;
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
-import br.study.ebah.miguel.cdsCatalog.elements.Song;
 
 /**
  * @author miguel
- * 
+ *
  */
-public class InMemoryDiscRW extends InMemoryDisc implements IsWritable {
+public class InMemorySongRW extends InMemorySong implements IsWritable {
 
-	/*
-	 * 
-	 */
-	public InMemoryDiscRW(String name) {
+	public InMemorySongRW(String name) {
 		super(name);
 	}
-
-	/*
-	 * 
-	 */
-	public InMemoryDiscRW(String name, Date date) {
-		super(name, date);
-	}
 	
-	/*
-	 * 
-	 */
-	public InMemoryDiscRW(Disc other) {
-		super(other);
+	InMemorySongRW(String name, Date firstReleaseDate) {
+		super(name, firstReleaseDate);
 	}
-
-	/*
+	/* 
 	 * 
-	 * @see
-	 * br.study.ebah.miguel.cdsCatalog.actions.IsWritable#asAddable(java.lang
-	 * .Class)
+	 * @see br.study.ebah.miguel.cdsCatalog.actions.IsWritable#asAddable(java.lang.Class)
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> Writable<T> asAddable(Class<T> type)
 			throws IllegalArgumentException {
-		if (type == Song.class) {
-			return (Writable<T>) new Writable<Song>() {
+		if (type == Disc.class) {
+			return (Writable<T>) new Writable<Disc>() {
 
-				public void add(Song t) {
-					songs.add(t);
+				public void add(Disc t) {
+					knownDiscs.add(t);
 				}
 
 			};
@@ -59,7 +43,7 @@ public class InMemoryDiscRW extends InMemoryDisc implements IsWritable {
 			return (Writable<T>) new Writable<Artist>() {
 
 				public void add(Artist t) {
-					artists.add(t);
+					knownArtists.add(t);
 				}
 
 			};
@@ -71,12 +55,12 @@ public class InMemoryDiscRW extends InMemoryDisc implements IsWritable {
 	/*
 	 * 
 	 */
-	public void setMain(Artist artist) {
-		if (this.artists.contains(artist)) {
-			this.mainArtist = artist;
+	public void setComposer(Composer composer) {
+		if (this.knownArtists.contains(composer)) {
+			this.composer = composer;
 		} else {
 			throw new IllegalArgumentException(
-					"This disc is unknown to this artist.");
+					"This artist is unknown to this song.");
 		}
 
 	}

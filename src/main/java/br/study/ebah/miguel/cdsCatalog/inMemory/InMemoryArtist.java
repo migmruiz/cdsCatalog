@@ -18,10 +18,17 @@ import br.study.ebah.miguel.cdsCatalog.elements.Song;
  */
 public class InMemoryArtist implements Artist {
 	private final String name;
-	final List<Song> knownSongs;
-	final List<Disc> knownDiscs;
-	final List<Disc> knownMainDiscs;
+	protected final List<Song> knownSongs;
+	protected final List<Disc> knownDiscs;
+	protected final List<Disc> knownMainDiscs;
 	private final Date birthday;
+	
+	/*
+	 * 
+	 */
+	public InMemoryArtist(String name) {
+		this(name, null);
+	}
 	
 	/*
 	 * 
@@ -123,7 +130,7 @@ public class InMemoryArtist implements Artist {
 	@Override
 	public String toString() {
 		// TODO Override Object method
-		return super.toString();
+		return getClass().getName() + "@" + Integer.toHexString(hashCode());
 	}
 
 }

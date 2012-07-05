@@ -26,19 +26,26 @@ public class InMemoryDisc implements Disc {
 	/*
 	 * 
 	 */
-	InMemoryDisc(String name, Date date) {
-		this.name = name;
-
-		this.songs = Collections.synchronizedList(new ArrayList<Song>());
-		this.artists = Collections.synchronizedList(new ArrayList<Artist>());
-
-		this.releaseDate = date;
+	public InMemoryDisc(String name) {
+		this(name, null);
 	}
 
 	/*
 	 * 
 	 */
-	InMemoryDisc(Disc other) {
+	public InMemoryDisc(String name, Date releaseDate) {
+		this.name = name;
+
+		this.songs = Collections.synchronizedList(new ArrayList<Song>());
+		this.artists = Collections.synchronizedList(new ArrayList<Artist>());
+
+		this.releaseDate = releaseDate;
+	}
+
+	/*
+	 * 
+	 */
+	public InMemoryDisc(Disc other) {
 		this.name = other.getName();
 
 		this.songs = Collections.synchronizedList(new ArrayList<Song>());
@@ -77,7 +84,11 @@ public class InMemoryDisc implements Disc {
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getMainArtist()
 	 */
 	public Artist getMainArtist() {
-		return new InMemoryArtist(this.mainArtist);
+		if (this.mainArtist == null) {
+			return new InMemoryArtist("Unknown Main Artist");
+		} else {
+			return new InMemoryArtist(this.mainArtist);
+		}
 	}
 
 	/*
@@ -92,7 +103,12 @@ public class InMemoryDisc implements Disc {
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getReleaseDate()
 	 */
 	public Date getReleaseDate() {
-		return (Date) this.releaseDate.clone();
+		if (this.releaseDate == null) {
+			System.err.println("Unknown release date.");
+			return new Date();
+		} else {
+			return (Date) this.releaseDate.clone();
+		}
 	}
 
 	/*
@@ -112,7 +128,7 @@ public class InMemoryDisc implements Disc {
 	@Override
 	public String toString() {
 		// TODO Override Object method
-		return super.toString();
+		return getClass().getName() + "@" + Integer.toHexString(hashCode());
 	}
 
 }

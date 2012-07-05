@@ -13,6 +13,11 @@ public interface Song {
 	/*
 	 * 
 	 */
+	public String getName();
+
+	/*
+	 * 
+	 */
 	public Composer getComposer();
 
 	/*
