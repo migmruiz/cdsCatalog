@@ -35,8 +35,8 @@ public class MySQLDisc implements Disc {
 		Date d = null;
 		this.disc = new InMemoryDiscRW(name, d);
 		this.disc.setMain(null);
-		Writable<Artist> artistWritableDisc = this.disc.asAddable(Artist.class);
-		Writable<Song> songWritableDisc = this.disc.asAddable(Song.class);
+		Writable<Artist> artistWritableDisc = this.disc.asWritable(Artist.class);
+		Writable<Song> songWritableDisc = this.disc.asWritable(Song.class);
 
 	}
 
@@ -52,8 +52,8 @@ public class MySQLDisc implements Disc {
 		Date d = null;
 		this.disc = new InMemoryDiscRW(name, d);
 		this.disc.setMain(null);
-		Writable<Artist> artistWritableDisc = this.disc.asAddable(Artist.class);
-		Writable<Song> songWritableDisc = this.disc.asAddable(Song.class);
+		Writable<Artist> artistWritableDisc = this.disc.asWritable(Artist.class);
+		Writable<Song> songWritableDisc = this.disc.asWritable(Song.class);
 	}
 
 	/*

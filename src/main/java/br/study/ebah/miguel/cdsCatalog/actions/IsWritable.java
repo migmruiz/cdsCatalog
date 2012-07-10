@@ -11,7 +11,7 @@ public interface IsWritable {
 	/*
 	 * 
 	 */
-	public <T> Writable<T> asAddable(Class<T> type)
+	public <T> Writable<T> asWritable(Class<T> type)
 			throws IllegalArgumentException;
 
 }

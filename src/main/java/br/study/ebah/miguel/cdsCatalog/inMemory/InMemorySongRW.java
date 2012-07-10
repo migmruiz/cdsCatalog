@@ -29,7 +29,7 @@ public class InMemorySongRW extends InMemorySong implements IsWritable {
 	 * @see br.study.ebah.miguel.cdsCatalog.actions.IsWritable#asAddable(java.lang.Class)
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Writable<T> asAddable(Class<T> type)
+	public <T> Writable<T> asWritable(Class<T> type)
 			throws IllegalArgumentException {
 		if (type == Disc.class) {
 			return (Writable<T>) new Writable<Disc>() {

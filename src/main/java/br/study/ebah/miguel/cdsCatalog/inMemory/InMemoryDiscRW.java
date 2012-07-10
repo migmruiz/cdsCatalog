@@ -45,7 +45,7 @@ public class InMemoryDiscRW extends InMemoryDisc implements IsWritable {
 	 * .Class)
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Writable<T> asAddable(Class<T> type)
+	public <T> Writable<T> asWritable(Class<T> type)
 			throws IllegalArgumentException {
 		if (type == Song.class) {
 			return (Writable<T>) new Writable<Song>() {

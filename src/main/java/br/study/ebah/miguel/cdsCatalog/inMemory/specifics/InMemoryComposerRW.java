@@ -72,7 +72,7 @@ public class InMemoryComposerRW extends InMemoryComposer implements IsWritable {
 	 * .Class)
 	 */
 	@SuppressWarnings(value = "unchecked")
-	public <T> Writable<T> asAddable(Class<T> type)
+	public <T> Writable<T> asWritable(Class<T> type)
 			throws IllegalArgumentException {
 		if (type == Song.class) {
 			return (Writable<T>) new Writable<Song>() {

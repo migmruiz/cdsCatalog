@@ -16,7 +16,7 @@ public class App {
 			InMemoryArtistRW artist = new InMemoryArtistRW("Eu", new Date());
 			Disc disc = new InMemoryDisc("", new Date());
 			System.out.println("Adding disc: " + disc);
-			artist.asAddable(Disc.class).add(disc);
+			artist.asWritable(Disc.class).add(disc);
 			System.out.println("Artist's known discs: "
 					+ artist.getKnownDiscs());
 		} catch (Exception e) {
