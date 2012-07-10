@@ -5,6 +5,7 @@ package br.study.ebah.miguel.cdsCatalog.sql;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Test;
 import org.junit.Before;
 
@@ -13,7 +14,7 @@ import org.junit.Before;
  *
  */
 public class MySQLDiscTest {
-	MySQLDisc disc;
+	private MySQLDisc disc;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -28,6 +29,11 @@ public class MySQLDiscTest {
 	@Test
 	public void getNameTest() {
 		System.out.println(disc.getName());
+	}
+	
+	@After
+	public void close() throws Exception {
+		disc.close();
 	}
 
 }

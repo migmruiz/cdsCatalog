@@ -19,7 +19,7 @@ import br.study.ebah.miguel.cdsCatalog.sql.access.MySQLConnectionFactory;
  * @author miguel
  * 
  */
-public class MySQLDisc implements Disc {
+public class MySQLDisc implements Disc, AutoCloseable {
 	private String name;
 	private final Connection con;
 	private long id;
@@ -32,23 +32,21 @@ public class MySQLDisc implements Disc {
 		this.name = name;
 		this.con = new MySQLConnectionFactory().getConnection();
 		try (PreparedStatement stmt = this.con
-				.prepareStatement("SELECT * FROM disc" /*"WHERE name=?"*/)) {
-			//stmt.setString(1, name);
+				.prepareStatement("SELECT * FROM disc WHERE name=?")) {
+			stmt.setString(1, name);
 			try (ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
-					if (rs.getString("name") == this.name) {
-						this.id = rs.getLong("id_disc");
-						java.sql.Date ds = rs.getDate("releaseDate");
-						if (ds == null) {
-							this.disc = new InMemoryDiscRW(this.name);
-						} else {
-							this.disc = new InMemoryDiscRW(this.name, new Date(
-									ds.getTime()));
-						}
-						// TODO generate Artist from artist's row
-						// this.disc.setMain(null);
+				if (rs.first()) {
+					this.id = rs.getLong("id_disc");
+					java.sql.Date ds = rs.getDate("releaseDate");
+					if (ds == null) {
+						this.disc = new InMemoryDiscRW(this.name);
+					} else {
+						this.disc = new InMemoryDiscRW(this.name, new Date(
+								ds.getTime()));
 					}
 				}
+				// TODO generate Artist from artist's row
+				// this.disc.setMain(null);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -69,21 +67,17 @@ public class MySQLDisc implements Disc {
 		this.con = new MySQLConnectionFactory().getConnection();
 
 		try (PreparedStatement stmt = this.con
-				.prepareStatement("SELECT * FROM disc" /*"WHERE id_disc=?"*/)) {
-			// stmt.setLong(1, this.id);
+				.prepareStatement("SELECT * FROM disc WHERE id_disc=?")) {
+			stmt.setLong(1, this.id);
 			try (ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
-					if (rs.getLong("id_disc") == this.id) {
-						this.name = rs.getString("name");
-						java.sql.Date ds = rs.getDate("releaseDate");
-						if (ds == null) {
-							this.disc = new InMemoryDiscRW(this.name);
-						} else {
-							this.disc = new InMemoryDiscRW(this.name, new Date(
-									ds.getTime()));
-						}
-						// TODO generate Artist from artist's row
-						// this.disc.setMain(null);
+				if (rs.first()) {
+					this.name = rs.getString("name");
+					java.sql.Date ds = rs.getDate("releaseDate");
+					if (ds == null) {
+						this.disc = new InMemoryDiscRW(this.name);
+					} else {
+						this.disc = new InMemoryDiscRW(this.name, new Date(
+								ds.getTime()));
 					}
 				}
 			}
@@ -166,6 +160,15 @@ public class MySQLDisc implements Disc {
 	public int hashCode() {
 		// TODO Override Object method
 		return super.hashCode();
+	}
+
+	/*
+	 * 
+	 * @see java.lang.AutoCloseable#close()
+	 */
+	@Override
+	public void close() throws Exception {
+		this.con.close();
 	}
 
 }
