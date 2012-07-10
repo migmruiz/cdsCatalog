@@ -133,4 +133,13 @@ public class InMemoryArtist implements Artist {
 		return getClass().getName() + "@" + Integer.toHexString(hashCode());
 	}
 
+	/*
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public int hashCode() {
+		// TODO Override Object method
+		return super.hashCode();
+	}
 }

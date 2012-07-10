@@ -1,66 +1,59 @@
 /**
  * 
  */
-package br.study.ebah.miguel.cdsCatalog.inMemory;
+package br.study.ebah.miguel.cdsCatalog.sql;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.sql.Connection;
 import java.util.Date;
-import java.util.List;
 
+import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.elements.Artist;
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
 import br.study.ebah.miguel.cdsCatalog.elements.Song;
+import br.study.ebah.miguel.cdsCatalog.inMemory.InMemoryDiscRW;
+import br.study.ebah.miguel.cdsCatalog.sql.acccess.MySQLConnectionFactory;
 
 /**
  * @author miguel
  * 
  */
-public class InMemoryDisc implements Disc {
+public class MySQLDisc implements Disc {
 	private final String name;
-	final List<Song> songs;
-	final List<Artist> artists;
-	Artist mainArtist;
-	private final Date releaseDate;
+	private final Connection con;
+	private final long id;
+	private final InMemoryDiscRW disc;
 
 	/*
 	 * 
 	 */
-	public InMemoryDisc(String name) {
-		this(name, null);
-	}
-
-	/*
-	 * 
-	 */
-	public InMemoryDisc(String name, Date releaseDate) {
+	public MySQLDisc(String name, MySQLConnectionFactory con) {
 		this.name = name;
+		this.con = con.getConnection();
+		// TODO connect and retrieve id
+		this.id = con.hashCode();
+		java.sql.Date ds = null;
+		Date d = null;
+		this.disc = new InMemoryDiscRW(name, d);
+		this.disc.setMain(null);
+		Writable<Artist> artistWritableDisc = this.disc.asAddable(Artist.class);
+		Writable<Song> songWritableDisc = this.disc.asAddable(Song.class);
 
-		this.songs = Collections.synchronizedList(new ArrayList<Song>());
-		this.artists = Collections.synchronizedList(new ArrayList<Artist>());
-
-		this.releaseDate = releaseDate;
 	}
 
 	/*
 	 * 
 	 */
-	public InMemoryDisc(Disc other) {
-		this.name = other.getName();
-
-		this.songs = Collections.synchronizedList(new ArrayList<Song>());
-		Iterable<Song> otherSongs = other.getSongs();
-		for (Song song : otherSongs) {
-			this.songs.add(song);
-		}
-
-		this.artists = Collections.synchronizedList(new ArrayList<Artist>());
-		Iterable<Artist> otherArtists = other.getArtists();
-		for (Artist artist : otherArtists) {
-			this.artists.add(artist);
-		}
-
-		this.releaseDate = other.getReleaseDate();
+	public MySQLDisc(long id, MySQLConnectionFactory con) {
+		this.id = id;
+		this.con = con.getConnection();
+		// TODO connect and retrieve name and releaseDate
+		this.name = con.toString();
+		java.sql.Date ds = null;
+		Date d = null;
+		this.disc = new InMemoryDiscRW(name, d);
+		this.disc.setMain(null);
+		Writable<Artist> artistWritableDisc = this.disc.asAddable(Artist.class);
+		Writable<Song> songWritableDisc = this.disc.asAddable(Song.class);
 	}
 
 	/*
@@ -76,7 +69,7 @@ public class InMemoryDisc implements Disc {
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getArtists()
 	 */
 	public Iterable<Artist> getArtists() {
-		return this.artists;
+		return this.disc.getArtists();
 	}
 
 	/*
@@ -84,11 +77,7 @@ public class InMemoryDisc implements Disc {
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getMainArtist()
 	 */
 	public Artist getMainArtist() {
-		if (this.mainArtist == null) {
-			return new InMemoryArtist("Unknown Main Artist");
-		} else {
-			return new InMemoryArtist(this.mainArtist);
-		}
+		return this.disc.getMainArtist();
 	}
 
 	/*
@@ -96,19 +85,15 @@ public class InMemoryDisc implements Disc {
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getSongs()
 	 */
 	public Iterable<Song> getSongs() {
-		return this.songs;
+		return this.disc.getSongs();
 	}
 
 	/*
+	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getReleaseDate()
 	 */
 	public Date getReleaseDate() {
-		if (this.releaseDate == null) {
-			System.err.println("Unknown release date.");
-			return new Date();
-		} else {
-			return (Date) this.releaseDate.clone();
-		}
+		return this.disc.getReleaseDate();
 	}
 
 	/*
@@ -130,7 +115,7 @@ public class InMemoryDisc implements Disc {
 		// TODO Override Object method
 		return getClass().getName() + "@" + Integer.toHexString(hashCode());
 	}
-	
+
 	/*
 	 * 
 	 * @see java.lang.Object#toString()

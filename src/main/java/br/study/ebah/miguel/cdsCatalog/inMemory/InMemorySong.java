@@ -148,5 +148,14 @@ public class InMemorySong implements Song {
 		// TODO Override Object method
 		return getClass().getName() + "@" + Integer.toHexString(hashCode());
 	}
-
+	
+	/*
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public int hashCode() {
+		// TODO Override Object method
+		return super.hashCode();
+	}
 }
