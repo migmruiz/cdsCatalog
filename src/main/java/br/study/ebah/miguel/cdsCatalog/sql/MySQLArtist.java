@@ -13,28 +13,34 @@ import javax.annotation.Nonnull;
 
 import com.google.common.base.Preconditions;
 
+import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.elements.Artist;
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
 import br.study.ebah.miguel.cdsCatalog.elements.Song;
 import br.study.ebah.miguel.cdsCatalog.inMemory.InMemoryArtistRW;
 import br.study.ebah.miguel.cdsCatalog.sql.access.MySQLConnectionFactory;
+import br.study.ebah.miguel.cdsCatalog.sql.access.SQLDBNoDataException;
 
 /**
  * @author miguel
  * 
  */
 public class MySQLArtist implements Artist, AutoCloseable {
-	private String name;
+	private final String name;
 	private Connection con;
 	private PreparedStatement nameStmt;
 	private PreparedStatement idStmt;
-	private long id;
+	private final long id;
 	private InMemoryArtistRW artist;
+	private Writable<Disc> discWritableArtist;
+	private PreparedStatement workingOnDiscsStmt;
+	private boolean discsAreSetted;
 
 	/*
 	 * 
 	 */
-	public MySQLArtist(@Nonnull String name) throws SQLException {
+	public MySQLArtist(@Nonnull String name) throws SQLException,
+			SQLDBNoDataException {
 		setupGlobal();
 		Preconditions.checkNotNull(name, "name cannot be null");
 		this.name = name;
@@ -45,6 +51,8 @@ public class MySQLArtist implements Artist, AutoCloseable {
 			if (rs.first()) {
 				this.id = rs.getLong("id_artist");
 				setupArtist(rs);
+			} else {
+				throw new SQLDBNoDataException("no data on artist table");
 			}
 		}
 
@@ -53,7 +61,8 @@ public class MySQLArtist implements Artist, AutoCloseable {
 	/*
 	 * 
 	 */
-	public MySQLArtist(@Nonnull Long id) throws SQLException {
+	public MySQLArtist(@Nonnull Long id) throws SQLException,
+			SQLDBNoDataException {
 		setupGlobal();
 		Preconditions.checkNotNull(id, "id cannot be null");
 		this.id = id.longValue();
@@ -64,16 +73,22 @@ public class MySQLArtist implements Artist, AutoCloseable {
 			if (rs.first()) {
 				this.name = rs.getString("name");
 				setupArtist(rs);
+			} else {
+				throw new SQLDBNoDataException("no data on artist table");
 			}
 		}
 	}
 
 	private final void setupGlobal() throws SQLException {
-		con = new MySQLConnectionFactory().getConnection();
-		nameStmt = con.prepareStatement("SELECT"
+		this.con = new MySQLConnectionFactory().getConnection();
+		this.nameStmt = con.prepareStatement("SELECT"
 				+ " * FROM artist WHERE name=?");
-		idStmt = con.prepareStatement("SELECT * FROM artist WHERE id_artist=?");
-
+		this.idStmt = con
+				.prepareStatement("SELECT * FROM artist WHERE id_artist=?");
+		this.workingOnDiscsStmt = con
+				.prepareStatement("SELECT * FROM `disc_artist-workingOn`"
+						+ " WHERE id_artist=?");
+		this.discsAreSetted = false;
 	}
 
 	private void setupArtist(ResultSet rs) throws SQLException {
@@ -84,10 +99,11 @@ public class MySQLArtist implements Artist, AutoCloseable {
 			this.artist = new InMemoryArtistRW(this.name, new Date(
 					birthdaySQL.getTime()));
 		}
+		// long mainDiscID = rs.getLong("id_disc");
+		this.discWritableArtist = this.artist.asWritable(Disc.class);
+		// this.discWritableArtist.add(new MySQLDisc(mainDiscID));
+		// this.artist.setMain(new MySQLDisc(mainDiscID));
 
-		// TODO write generate mainDiscs and discs from discs's rows, and
-		// Song from song's rows
-		// Writable<Song> songWritableDisc = this.disc.asWritable(Song.class);
 	}
 
 	/*
@@ -103,7 +119,23 @@ public class MySQLArtist implements Artist, AutoCloseable {
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getKnownDiscs()
 	 */
 	public Iterable<Disc> getKnownDiscs() {
+		if (!this.discsAreSetted)
+			try {
+				workingOnDiscsStmt.setLong(1, this.id);
+				try (ResultSet discs_rs = workingOnDiscsStmt.executeQuery()) {
+					while (discs_rs.next()) {
+						this.discWritableArtist.add(new MySQLDisc(discs_rs
+								.getLong("id_artist")));
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		this.discsAreSetted = true;
 		return this.artist.getKnownDiscs();
+		// TODO write generate mainDiscs from discs's rows, and songs from
+		// song's rows
+		// Writable<Song> songWritableDisc = this.disc.asWritable(Song.class);
 	}
 
 	/*

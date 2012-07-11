@@ -26,18 +26,25 @@ import br.study.ebah.miguel.cdsCatalog.sql.access.MySQLConnectionFactory;
  * 
  */
 public class MySQLDisc implements Disc, AutoCloseable {
+
+	private final long id;
 	private final String name;
+	private MySQLArtist mainArtist;
+
 	private Connection con;
 	private PreparedStatement nameStmt;
 	private PreparedStatement idStmt;
-	private final long id;
+	private PreparedStatement workingOnArtistsStmt;
 	private InMemoryDiscRW disc;
+	private Writable<Artist> artistWritableDisc;
 	private final MySQLConnectionFactory connFact = new MySQLConnectionFactory();
+	private boolean artistsAreSetted;
 
 	/*
 	 * 
 	 */
-	public MySQLDisc(@Nonnull String name) throws SQLException, Exception {
+	public MySQLDisc(@Nonnull String name) throws SQLException,
+			SQLDBNoDataException {
 		setupGlobal();
 		Preconditions.checkNotNull(name, "name cannot be null");
 		this.name = name;
@@ -57,7 +64,8 @@ public class MySQLDisc implements Disc, AutoCloseable {
 	/*
 	 * 
 	 */
-	public MySQLDisc(@Nonnull Long id) throws SQLException, Exception {
+	public MySQLDisc(@Nonnull Long id) throws SQLException,
+			SQLDBNoDataException {
 		setupGlobal();
 		Preconditions.checkNotNull(id, "id cannot be null");
 		this.id = id.longValue();
@@ -79,7 +87,10 @@ public class MySQLDisc implements Disc, AutoCloseable {
 		this.nameStmt = con.prepareStatement("SELECT * FROM disc WHERE name=?");
 		this.idStmt = con
 				.prepareStatement("SELECT * FROM disc WHERE id_disc=?");
-
+		this.workingOnArtistsStmt = con
+				.prepareStatement("SELECT * FROM `disc_artist-workingOn`"
+						+ " WHERE id_disc=?");
+		this.artistsAreSetted = false;
 	}
 
 	private void setupDisc(ResultSet rs) throws SQLException {
@@ -90,15 +101,11 @@ public class MySQLDisc implements Disc, AutoCloseable {
 			this.disc = new InMemoryDiscRW(this.name, new Date(
 					releaseDateSQL.getTime()));
 		}
-		long mainArtist = rs.getLong("id_mainArtist");
-		Writable<Artist> artistWritableDisc = this.disc
-				.asWritable(Artist.class);
-		artistWritableDisc.add(new MySQLArtist(mainArtist));
-		this.disc.setMain(new MySQLArtist(mainArtist));
-
-		// TODO write generate artists from artist's row, and songs from song's
-		// row
-		// Writable<Song> songWritableDisc = this.disc.asWritable(Song.class);
+		long mainArtistID = rs.getLong("id_mainArtist");
+		this.artistWritableDisc = this.disc.asWritable(Artist.class);
+		mainArtist = new MySQLArtist(mainArtistID);
+		this.artistWritableDisc.add(mainArtist);
+		this.disc.setMain(mainArtist);
 	}
 
 	/*
@@ -114,7 +121,23 @@ public class MySQLDisc implements Disc, AutoCloseable {
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getArtists()
 	 */
 	public Iterable<Artist> getArtists() {
+		if (!this.artistsAreSetted)
+			try {
+				workingOnArtistsStmt.setLong(1, this.id);
+				try (ResultSet artists_rs = workingOnArtistsStmt.executeQuery()) {
+					while (artists_rs.next()) {
+						this.artistWritableDisc.add(new MySQLArtist(artists_rs
+								.getLong("id_artist")));
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		artistsAreSetted = true;
 		return this.disc.getArtists();
+
+		// TODO write and generate songs from song's row
+		// Writable<Song> songWritableDisc = this.disc.asWritable(Song.class);
 	}
 
 	/*
