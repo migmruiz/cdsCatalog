@@ -21,35 +21,41 @@ import br.study.ebah.miguel.cdsCatalog.sql.access.MySQLConnectionFactory;
  */
 public class MySQLDisc implements Disc, AutoCloseable {
 	private String name;
-	private final Connection con;
+	private static final Connection con;
+	private static PreparedStatement nameStmt;
+	private static PreparedStatement idStmt;
 	private long id;
 	private InMemoryDiscRW disc;
+
+	static {
+		con = new MySQLConnectionFactory().getConnection();
+		try {
+			nameStmt = con.prepareStatement("SELECT * FROM disc WHERE name=?");
+			idStmt = con.prepareStatement("SELECT * FROM disc WHERE id_disc=?");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/*
 	 * 
 	 */
-	public MySQLDisc(String name) {
+	public MySQLDisc(String name) throws SQLException {
 		this.name = name;
-		this.con = new MySQLConnectionFactory().getConnection();
-		try (PreparedStatement stmt = this.con
-				.prepareStatement("SELECT * FROM disc WHERE name=?")) {
-			stmt.setString(1, name);
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.first()) {
-					this.id = rs.getLong("id_disc");
-					java.sql.Date ds = rs.getDate("releaseDate");
-					if (ds == null) {
-						this.disc = new InMemoryDiscRW(this.name);
-					} else {
-						this.disc = new InMemoryDiscRW(this.name, new Date(
-								ds.getTime()));
-					}
+		nameStmt.setString(1, name);
+		try (ResultSet rs = nameStmt.executeQuery()) {
+			if (rs.first()) {
+				this.id = rs.getLong("id_disc");
+				java.sql.Date ds = rs.getDate("releaseDate");
+				if (ds == null) {
+					this.disc = new InMemoryDiscRW(this.name);
+				} else {
+					this.disc = new InMemoryDiscRW(this.name, new Date(
+							ds.getTime()));
 				}
-				// TODO generate Artist from artist's row
-				// this.disc.setMain(null);
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+			// TODO generate Artist from artist's row
+			// this.disc.setMain(null);
 		}
 		// TODO write generate Artist from artist's row, and Song from song's
 		// row
@@ -62,28 +68,21 @@ public class MySQLDisc implements Disc, AutoCloseable {
 	/*
 	 * 
 	 */
-	public MySQLDisc(long id) {
+	public MySQLDisc(long id) throws SQLException {
 		this.id = id;
-		this.con = new MySQLConnectionFactory().getConnection();
 
-		try (PreparedStatement stmt = this.con
-				.prepareStatement("SELECT * FROM disc WHERE id_disc=?")) {
-			stmt.setLong(1, this.id);
-			try (ResultSet rs = stmt.executeQuery()) {
-				if (rs.first()) {
-					this.name = rs.getString("name");
-					java.sql.Date ds = rs.getDate("releaseDate");
-					if (ds == null) {
-						this.disc = new InMemoryDiscRW(this.name);
-					} else {
-						this.disc = new InMemoryDiscRW(this.name, new Date(
-								ds.getTime()));
-					}
+		idStmt.setLong(1, this.id);
+		try (ResultSet rs = idStmt.executeQuery()) {
+			if (rs.first()) {
+				this.name = rs.getString("name");
+				java.sql.Date ds = rs.getDate("releaseDate");
+				if (ds == null) {
+					this.disc = new InMemoryDiscRW(this.name);
+				} else {
+					this.disc = new InMemoryDiscRW(this.name, new Date(
+							ds.getTime()));
 				}
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		// TODO write generate Artist from artist's row, and Song from song's
 		// row
@@ -168,7 +167,9 @@ public class MySQLDisc implements Disc, AutoCloseable {
 	 */
 	@Override
 	public void close() throws Exception {
-		this.con.close();
+		idStmt.close();
+		nameStmt.close();
+		con.close();
 	}
 
 }
