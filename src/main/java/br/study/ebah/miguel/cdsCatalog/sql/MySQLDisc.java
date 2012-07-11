@@ -28,12 +28,13 @@ public class MySQLDisc implements Disc, AutoCloseable {
 	private InMemoryDiscRW disc;
 
 	static {
-		con = new MySQLConnectionFactory().getConnection();
 		try {
+			con = new MySQLConnectionFactory().getConnection();
 			nameStmt = con.prepareStatement("SELECT * FROM disc WHERE name=?");
 			idStmt = con.prepareStatement("SELECT * FROM disc WHERE id_disc=?");
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} catch (Throwable t) {
+			t.printStackTrace();
+			throw new Error(t);
 		}
 	}
 
