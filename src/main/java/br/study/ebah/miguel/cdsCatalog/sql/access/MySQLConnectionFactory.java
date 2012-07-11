@@ -12,24 +12,23 @@ import java.sql.SQLException;
  * 
  */
 public class MySQLConnectionFactory {
-	Connection con;
-	
+	private static Connection con;
+
 	/**
 	 * Default constructor
+	 * 
+	 * @throws SQLException
 	 */
-	public MySQLConnectionFactory() {
-		try {
+	public MySQLConnectionFactory() throws SQLException {
+		if (con == null || con.isClosed()) {
 			con = DriverManager.getConnection(
 					"jdbc:mysql://localhost/cdsCatalog", "logmanager",
 					"cdscatalogmanager");
-		} catch (SQLException e) {
-			e.printStackTrace();
 		}
-
 	}
 
 	public Connection getConnection() {
-		return this.con;
+		return con;
 	}
 
 }

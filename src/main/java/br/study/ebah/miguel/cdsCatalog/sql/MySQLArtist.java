@@ -13,31 +13,28 @@ import javax.annotation.Nonnull;
 
 import com.google.common.base.Preconditions;
 
-import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.elements.Artist;
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
 import br.study.ebah.miguel.cdsCatalog.elements.Song;
-import br.study.ebah.miguel.cdsCatalog.inMemory.InMemoryDiscRW;
-import br.study.ebah.miguel.cdsCatalog.sql.access.SQLDBNoDataException;
+import br.study.ebah.miguel.cdsCatalog.inMemory.InMemoryArtistRW;
 import br.study.ebah.miguel.cdsCatalog.sql.access.MySQLConnectionFactory;
 
 /**
  * @author miguel
  * 
  */
-public class MySQLDisc implements Disc, AutoCloseable {
-	private final String name;
+public class MySQLArtist implements Artist, AutoCloseable {
+	private String name;
 	private Connection con;
 	private PreparedStatement nameStmt;
 	private PreparedStatement idStmt;
-	private final long id;
-	private InMemoryDiscRW disc;
-	private final MySQLConnectionFactory connFact = new MySQLConnectionFactory();
+	private long id;
+	private InMemoryArtistRW artist;
 
 	/*
 	 * 
 	 */
-	public MySQLDisc(@Nonnull String name) throws SQLException, Exception {
+	public MySQLArtist(@Nonnull String name) throws SQLException {
 		setupGlobal();
 		Preconditions.checkNotNull(name, "name cannot be null");
 		this.name = name;
@@ -46,18 +43,17 @@ public class MySQLDisc implements Disc, AutoCloseable {
 		nameStmt.setString(1, name);
 		try (ResultSet rs = nameStmt.executeQuery()) {
 			if (rs.first()) {
-				this.id = rs.getLong("id_disc");
-				setupDisc(rs);
-			} else {
-				throw new SQLDBNoDataException("no data on disc table");
+				this.id = rs.getLong("id_artist");
+				setupArtist(rs);
 			}
 		}
+
 	}
 
 	/*
 	 * 
 	 */
-	public MySQLDisc(@Nonnull Long id) throws SQLException, Exception {
+	public MySQLArtist(@Nonnull Long id) throws SQLException {
 		setupGlobal();
 		Preconditions.checkNotNull(id, "id cannot be null");
 		this.id = id.longValue();
@@ -67,37 +63,30 @@ public class MySQLDisc implements Disc, AutoCloseable {
 		try (ResultSet rs = idStmt.executeQuery()) {
 			if (rs.first()) {
 				this.name = rs.getString("name");
-				setupDisc(rs);
-			} else {
-				throw new SQLDBNoDataException("no data on disc table");
+				setupArtist(rs);
 			}
 		}
 	}
 
 	private final void setupGlobal() throws SQLException {
-		this.con = connFact.getConnection();
-		this.nameStmt = con.prepareStatement("SELECT * FROM disc WHERE name=?");
-		this.idStmt = con
-				.prepareStatement("SELECT * FROM disc WHERE id_disc=?");
+		con = new MySQLConnectionFactory().getConnection();
+		nameStmt = con.prepareStatement("SELECT"
+				+ " * FROM artist WHERE name=?");
+		idStmt = con.prepareStatement("SELECT * FROM artist WHERE id_artist=?");
 
 	}
 
-	private void setupDisc(ResultSet rs) throws SQLException {
-		java.sql.Date releaseDateSQL = rs.getDate("releaseDate");
-		if (releaseDateSQL == null) {
-			this.disc = new InMemoryDiscRW(this.name);
+	private void setupArtist(ResultSet rs) throws SQLException {
+		java.sql.Date birthdaySQL = rs.getDate("birthday");
+		if (birthdaySQL == null) {
+			this.artist = new InMemoryArtistRW(this.name);
 		} else {
-			this.disc = new InMemoryDiscRW(this.name, new Date(
-					releaseDateSQL.getTime()));
+			this.artist = new InMemoryArtistRW(this.name, new Date(
+					birthdaySQL.getTime()));
 		}
-		long mainArtist = rs.getLong("id_mainArtist");
-		Writable<Artist> artistWritableDisc = this.disc
-				.asWritable(Artist.class);
-		artistWritableDisc.add(new MySQLArtist(mainArtist));
-		this.disc.setMain(new MySQLArtist(mainArtist));
 
-		// TODO write generate artists from artist's row, and songs from song's
-		// row
+		// TODO write generate mainDiscs and discs from discs's rows, and
+		// Song from song's rows
 		// Writable<Song> songWritableDisc = this.disc.asWritable(Song.class);
 	}
 
@@ -111,34 +100,34 @@ public class MySQLDisc implements Disc, AutoCloseable {
 
 	/*
 	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getArtists()
+	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getKnownDiscs()
 	 */
-	public Iterable<Artist> getArtists() {
-		return this.disc.getArtists();
+	public Iterable<Disc> getKnownDiscs() {
+		return this.artist.getKnownDiscs();
 	}
 
 	/*
 	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getMainArtist()
+	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getKnownMainDiscs()
 	 */
-	public Artist getMainArtist() {
-		return this.disc.getMainArtist();
+	public Iterable<Disc> getKnownMainDiscs() {
+		return this.artist.getKnownMainDiscs();
 	}
 
 	/*
 	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getSongs()
+	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getKnownSongs()
 	 */
-	public Iterable<Song> getSongs() {
-		return this.disc.getSongs();
+	public Iterable<Song> getKnownSongs() {
+		return this.artist.getKnownSongs();
 	}
 
 	/*
 	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getReleaseDate()
+	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getBirthday()
 	 */
-	public Date getReleaseDate() {
-		return this.disc.getReleaseDate();
+	public Date getBirthday() {
+		return this.artist.getBirthday();
 	}
 
 	/*

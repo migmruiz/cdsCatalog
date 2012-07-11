@@ -72,12 +72,13 @@ public class InMemoryDiscRW extends InMemoryDisc implements IsWritable {
 	 * 
 	 */
 	public void setMain(Artist artist) {
-		if (this.artists.contains(artist)) {
+		// TODO uncomment
+//		if (this.artists.contains(artist)) {
 			this.mainArtist = artist;
-		} else {
-			throw new IllegalArgumentException(
-					"This disc is unknown to this artist.");
-		}
+//		} else {
+//			throw new IllegalArgumentException(
+//					"This disc is unknown to this artist.");
+//		}
 
 	}
 

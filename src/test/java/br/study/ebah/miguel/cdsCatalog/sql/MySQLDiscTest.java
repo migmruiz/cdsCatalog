@@ -3,37 +3,73 @@
  */
 package br.study.ebah.miguel.cdsCatalog.sql;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Test;
 import org.junit.Before;
 
+import br.study.ebah.miguel.cdsCatalog.elements.Disc;
+import br.study.ebah.miguel.cdsCatalog.sql.access.SQLDBNoDataException;
+
 /**
  * @author miguel
- *
+ * 
  */
 public class MySQLDiscTest {
-	private MySQLDisc disc;
-	
+	private Disc disc;
+
 	@Before
 	public void setUp() throws Exception {
-		disc = new MySQLDisc(1);
+		this.disc = new MySQLDisc(1L);
 	}
-	
+
 	@Test
 	public void constructorTest() {
 		Assert.assertNotNull(disc);
 	}
-	
+
 	@Test
 	public void getNameTest() {
-		System.out.println(disc.getName());
+		Assert.assertNotNull(disc.getName());
 	}
-	
+
+	@Test
+	public void getMainArtistTest() {
+		Assert.assertNotNull(disc.getMainArtist().getName());
+	}
+
+	@Test
+	public void allDiscsPrintingTest() throws Exception {
+		List<Disc> discs = new ArrayList<Disc>();
+		boolean goOn = true;
+		try {
+			for (long i = 1L; goOn; i++) {
+				discs.add(new MySQLDisc(i));
+			}
+		} catch (SQLException | SQLDBNoDataException e) {
+			goOn = false;
+		} finally {
+			try {
+				for (Disc disc : discs) {
+					System.out.println(disc.getName() + " - "
+							+ disc.getMainArtist().getName());
+				}
+			} catch (NullPointerException e) {
+
+			}
+		}
+	}
+
 	@After
 	public void close() throws Exception {
-		disc.close();
+		if (disc != null && disc instanceof MySQLDisc) {
+			((MySQLDisc) disc).close();
+		}
 	}
 
 }
