@@ -1,7 +1,7 @@
 /**
  * 
  */
-package br.study.ebah.miguel.cdsCatalog.sql;
+package br.study.ebah.miguel.cdsCatalog.sql.elements;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,7 +17,7 @@ import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.elements.Artist;
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
 import br.study.ebah.miguel.cdsCatalog.elements.Song;
-import br.study.ebah.miguel.cdsCatalog.inMemory.InMemoryDiscRW;
+import br.study.ebah.miguel.cdsCatalog.inMemory.elements.InMemoryDiscRW;
 import br.study.ebah.miguel.cdsCatalog.sql.access.SQLDBNoDataException;
 import br.study.ebah.miguel.cdsCatalog.sql.access.MySQLConnectionFactory;
 
@@ -31,14 +31,15 @@ public class MySQLDisc implements Disc, AutoCloseable {
 	private final String name;
 	private MySQLArtist mainArtist;
 
+	private InMemoryDiscRW disc;
+	private Writable<Artist> artistWritableDisc;
+
 	private Connection con;
 	private PreparedStatement nameStmt;
 	private PreparedStatement idStmt;
 	private PreparedStatement workingOnArtistsStmt;
-	private InMemoryDiscRW disc;
-	private Writable<Artist> artistWritableDisc;
-	private final MySQLConnectionFactory connFact = new MySQLConnectionFactory();
 	private boolean artistsAreSetted;
+	private final MySQLConnectionFactory connFact = new MySQLConnectionFactory();
 
 	/*
 	 * 
@@ -84,7 +85,8 @@ public class MySQLDisc implements Disc, AutoCloseable {
 
 	private final void setupGlobal() throws SQLException {
 		this.con = connFact.getConnection();
-		this.nameStmt = con.prepareStatement("SELECT * FROM disc WHERE name=?");
+		this.nameStmt = con
+				.prepareStatement("SELECT * FROM disc WHERE name=?");
 		this.idStmt = con
 				.prepareStatement("SELECT * FROM disc WHERE id_disc=?");
 		this.workingOnArtistsStmt = con

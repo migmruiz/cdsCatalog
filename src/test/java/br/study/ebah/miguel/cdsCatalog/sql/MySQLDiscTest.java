@@ -15,6 +15,7 @@ import org.junit.Before;
 
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
 import br.study.ebah.miguel.cdsCatalog.sql.access.SQLDBNoDataException;
+import br.study.ebah.miguel.cdsCatalog.sql.elements.MySQLDisc;
 
 /**
  * @author miguel

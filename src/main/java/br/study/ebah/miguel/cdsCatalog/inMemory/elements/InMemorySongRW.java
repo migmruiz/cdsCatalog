@@ -1,7 +1,7 @@
 /**
  * 
  */
-package br.study.ebah.miguel.cdsCatalog.inMemory;
+package br.study.ebah.miguel.cdsCatalog.inMemory.elements;
 
 import java.util.Date;
 

@@ -1,13 +1,13 @@
 /**
  * 
  */
-package br.study.ebah.miguel.cdsCatalog.inMemory;
+package br.study.ebah.miguel.cdsCatalog.inMemory.elements;
 
 import java.util.Date;
 
-import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
-import br.study.ebah.miguel.cdsCatalog.elements.Artist;
+import br.study.ebah.miguel.cdsCatalog.actions.Writable;
+import br.study.ebah.miguel.cdsCatalog.elements.Composer;
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
 import br.study.ebah.miguel.cdsCatalog.elements.Song;
 
@@ -15,28 +15,29 @@ import br.study.ebah.miguel.cdsCatalog.elements.Song;
  * @author miguel
  * 
  */
-public class InMemoryArtistRW extends InMemoryArtist implements IsWritable {
-	
+public class InMemoryComposerRW extends InMemoryComposer implements IsWritable {
+
 	/*
 	 * 
 	 */
-	public InMemoryArtistRW(String name) {
-		super(name);
-	}
-	
-	/*
-	 * 
-	 */
-	public InMemoryArtistRW(String name, Date birthday) {
-		super(name, birthday);
-	}
-	
-	/*
-	 * 
-	 */
-	public InMemoryArtistRW(Artist other) {
+	public InMemoryComposerRW(Composer other) {
 		super(other);
 	}
+
+	/*
+	 * 
+	 */
+	public InMemoryComposerRW(String name) {
+		super(name);
+	}
+
+	/*
+	 * 
+	 */
+	public InMemoryComposerRW(String name, Date birthday) {
+		super(name, birthday);
+	}
+
 
 	/*
 	 * 
@@ -46,7 +47,20 @@ public class InMemoryArtistRW extends InMemoryArtist implements IsWritable {
 			this.knownMainDiscs.add(disc);
 		} else {
 			throw new IllegalArgumentException(
-					"This disc is unknown to this artist.");
+					"This disc is unknown to this composer.");
+		}
+
+	}
+	
+	/*
+	 * 
+	 */
+	public void setMain(Song song) {
+		if (this.knownComposedSongs.contains(song)) {
+			this.knownMainComposedSongs.add(song);
+		} else {
+			throw new IllegalArgumentException(
+					"This song is unknown to this composer.");
 		}
 
 	}
@@ -80,5 +94,6 @@ public class InMemoryArtistRW extends InMemoryArtist implements IsWritable {
 			throw new IllegalArgumentException();
 		}
 	}
+	
 
 }

@@ -1,10 +1,10 @@
-package br.study.ebah.miguel.cdsCatalog;
+package br.study.ebah.miguel.cdsCatalog.main;
 
 import java.util.Date;
 
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
-import br.study.ebah.miguel.cdsCatalog.inMemory.InMemoryArtistRW;
-import br.study.ebah.miguel.cdsCatalog.inMemory.InMemoryDisc;
+import br.study.ebah.miguel.cdsCatalog.inMemory.elements.InMemoryArtistRW;
+import br.study.ebah.miguel.cdsCatalog.inMemory.elements.InMemoryDisc;
 
 /**
  * Hello world!

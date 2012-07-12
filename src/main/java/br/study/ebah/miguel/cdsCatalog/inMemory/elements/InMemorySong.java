@@ -1,7 +1,7 @@
 /**
  * 
  */
-package br.study.ebah.miguel.cdsCatalog.inMemory;
+package br.study.ebah.miguel.cdsCatalog.inMemory.elements;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +12,6 @@ import br.study.ebah.miguel.cdsCatalog.elements.Artist;
 import br.study.ebah.miguel.cdsCatalog.elements.Composer;
 import br.study.ebah.miguel.cdsCatalog.elements.Disc;
 import br.study.ebah.miguel.cdsCatalog.elements.Song;
-import br.study.ebah.miguel.cdsCatalog.inMemory.specifics.InMemoryComposer;
 
 /**
  * @author miguel
