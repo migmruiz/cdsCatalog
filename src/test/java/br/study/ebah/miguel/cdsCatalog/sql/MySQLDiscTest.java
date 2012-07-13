@@ -61,7 +61,7 @@ public class MySQLDiscTest {
 							+ disc.getMainArtist().getName());
 				}
 			} catch (NullPointerException e) {
-
+				Assert.fail(e.getMessage());
 			}
 		}
 	}
