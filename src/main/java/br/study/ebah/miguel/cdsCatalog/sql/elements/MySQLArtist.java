@@ -37,13 +37,13 @@ public class MySQLArtist implements Artist, AutoCloseable {
 	private PreparedStatement idStmt;
 	private PreparedStatement workingOnDiscsStmt;
 	private boolean discsAreSetted;
-	private final MySQLConnectionFactory connFact = new MySQLConnectionFactory();
+	private MySQLConnectionFactory connFact;
 
 	/*
 	 * 
 	 */
 	public MySQLArtist(@Nonnull String name) throws SQLException,
-			SQLDBNoDataException {
+			SQLDBNoDataException, ClassNotFoundException {
 		setupGlobal();
 		Preconditions.checkNotNull(name, "name cannot be null");
 		this.name = name;
@@ -65,7 +65,7 @@ public class MySQLArtist implements Artist, AutoCloseable {
 	 * 
 	 */
 	public MySQLArtist(@Nonnull Long id) throws SQLException,
-			SQLDBNoDataException {
+			SQLDBNoDataException, ClassNotFoundException {
 		setupGlobal();
 		Preconditions.checkNotNull(id, "id cannot be null");
 		this.id = id.longValue();
@@ -82,7 +82,8 @@ public class MySQLArtist implements Artist, AutoCloseable {
 		}
 	}
 
-	private final void setupGlobal() throws SQLException {
+	private final void setupGlobal() throws SQLException, ClassNotFoundException {
+		this.connFact = new MySQLConnectionFactory();
 		this.con = connFact.getConnection();
 		this.nameStmt = con
 				.prepareStatement("SELECT * FROM artist WHERE name=?");
@@ -131,7 +132,7 @@ public class MySQLArtist implements Artist, AutoCloseable {
 								.getLong("id_artist")));
 					}
 				}
-			} catch (SQLException e) {
+			} catch (SQLException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
 		this.discsAreSetted = true;

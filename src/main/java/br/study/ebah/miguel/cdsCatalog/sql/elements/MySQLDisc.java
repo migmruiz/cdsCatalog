@@ -39,13 +39,13 @@ public class MySQLDisc implements Disc, AutoCloseable {
 	private PreparedStatement idStmt;
 	private PreparedStatement workingOnArtistsStmt;
 	private boolean artistsAreSetted;
-	private final MySQLConnectionFactory connFact = new MySQLConnectionFactory();
+	private MySQLConnectionFactory connFact;
 
 	/*
 	 * 
 	 */
 	public MySQLDisc(@Nonnull String name) throws SQLException,
-			SQLDBNoDataException {
+			SQLDBNoDataException, ClassNotFoundException {
 		setupGlobal();
 		Preconditions.checkNotNull(name, "name cannot be null");
 		this.name = name;
@@ -66,7 +66,7 @@ public class MySQLDisc implements Disc, AutoCloseable {
 	 * 
 	 */
 	public MySQLDisc(@Nonnull Long id) throws SQLException,
-			SQLDBNoDataException {
+			SQLDBNoDataException, ClassNotFoundException {
 		setupGlobal();
 		Preconditions.checkNotNull(id, "id cannot be null");
 		this.id = id.longValue();
@@ -83,7 +83,8 @@ public class MySQLDisc implements Disc, AutoCloseable {
 		}
 	}
 
-	private final void setupGlobal() throws SQLException {
+	private final void setupGlobal() throws SQLException, ClassNotFoundException {
+		this.connFact = new MySQLConnectionFactory();
 		this.con = connFact.getConnection();
 		this.nameStmt = con
 				.prepareStatement("SELECT * FROM disc WHERE name=?");
@@ -95,7 +96,7 @@ public class MySQLDisc implements Disc, AutoCloseable {
 		this.artistsAreSetted = false;
 	}
 
-	private void setupDisc(ResultSet rs) throws SQLException {
+	private void setupDisc(ResultSet rs) throws SQLException, SQLDBNoDataException, ClassNotFoundException {
 		java.sql.Date releaseDateSQL = rs.getDate("releaseDate");
 		if (releaseDateSQL == null) {
 			this.disc = new InMemoryDiscRW(this.name);
@@ -131,8 +132,11 @@ public class MySQLDisc implements Disc, AutoCloseable {
 						this.artistWritableDisc.add(new MySQLArtist(artists_rs
 								.getLong("id_artist")));
 					}
+				} catch (SQLDBNoDataException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (SQLException e) {
+			} catch (SQLException | ClassNotFoundException e) {
 				e.printStackTrace();
 			}
 		artistsAreSetted = true;

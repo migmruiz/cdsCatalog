@@ -18,9 +18,11 @@ public class MySQLConnectionFactory {
 	 * Default constructor
 	 * 
 	 * @throws SQLException
+	 * @throws ClassNotFoundException 
 	 */
-	public MySQLConnectionFactory() throws SQLException {
+	public MySQLConnectionFactory() throws SQLException, ClassNotFoundException {
 		if (con == null || con.isClosed()) {
+			Class.forName("com.mysql.jdbc.Driver");
 			con = DriverManager.getConnection(
 					"jdbc:mysql://localhost/cdsCatalog", "logmanager",
 					"cdscatalogmanager");

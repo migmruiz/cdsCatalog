@@ -16,7 +16,7 @@ import org.junit.Test;
 public class MySQLConnectionFactoryTest {
 
 	@Test
-	public void getConnectionTest() throws SQLException {
+	public void getConnectionTest() throws SQLException, ClassNotFoundException {
 		Assert.assertNotNull(new MySQLConnectionFactory().getConnection());
 	}
 
