@@ -6,11 +6,11 @@ package br.study.ebah.miguel.cdsCatalog.inMemory.elements;
 import java.util.Date;
 
 import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
-import br.study.ebah.miguel.cdsCatalog.actions.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
 /**
  * @author miguel

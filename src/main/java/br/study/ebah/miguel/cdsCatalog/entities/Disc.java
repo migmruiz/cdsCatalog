@@ -5,7 +5,7 @@ package br.study.ebah.miguel.cdsCatalog.entities;
 
 import java.util.Date;
 
-import br.study.ebah.miguel.cdsCatalog.actions.RepositoryException;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
 /**
  * @author miguel

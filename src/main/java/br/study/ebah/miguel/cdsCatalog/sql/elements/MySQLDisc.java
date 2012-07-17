@@ -13,12 +13,12 @@ import javax.annotation.Nonnull;
 
 import com.google.common.base.Preconditions;
 
-import br.study.ebah.miguel.cdsCatalog.actions.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
 import br.study.ebah.miguel.cdsCatalog.inMemory.elements.InMemoryDiscRW;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.sql.access.SQLDBNoDataException;
 import br.study.ebah.miguel.cdsCatalog.sql.access.MySQLConnectionFactory;
 
