@@ -8,8 +8,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import br.study.ebah.miguel.cdsCatalog.elements.Composer;
-import br.study.ebah.miguel.cdsCatalog.elements.Song;
+import br.study.ebah.miguel.cdsCatalog.entities.Composer;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
 /**
  * @author miguel
@@ -42,7 +43,7 @@ public class InMemoryComposer extends InMemoryArtist implements Composer {
 				.synchronizedList(new ArrayList<Song>());
 	}
 
-	public InMemoryComposer(Composer other) {
+	public InMemoryComposer(Composer other) throws RepositoryException {
 		super(other);
 		this.knownComposedSongs = Collections
 				.synchronizedList(new ArrayList<Song>());

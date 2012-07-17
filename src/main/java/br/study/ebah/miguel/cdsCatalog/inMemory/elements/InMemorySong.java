@@ -8,10 +8,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import br.study.ebah.miguel.cdsCatalog.elements.Artist;
-import br.study.ebah.miguel.cdsCatalog.elements.Composer;
-import br.study.ebah.miguel.cdsCatalog.elements.Disc;
-import br.study.ebah.miguel.cdsCatalog.elements.Song;
+import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.entities.Composer;
+import br.study.ebah.miguel.cdsCatalog.entities.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
 /**
  * @author miguel
@@ -48,7 +49,7 @@ public class InMemorySong implements Song {
 	/*
 	 * 
 	 */
-	public InMemorySong(Song other) {
+	public InMemorySong(Song other) throws RepositoryException {
 		this.name = other.getName();
 
 		this.knownArtists = Collections
@@ -69,6 +70,24 @@ public class InMemorySong implements Song {
 
 	/*
 	 * 
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
+	 */
+	public int getId() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/*
+	 * 
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
+	 */
+	public boolean isTransient() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	/*
+	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Song#getName()
 	 */
 	public String getName() {
@@ -79,7 +98,7 @@ public class InMemorySong implements Song {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Song#getComposer()
 	 */
-	public Composer getComposer() {
+	public Composer getComposer() throws RepositoryException {
 		if (this.composer == null) {
 			return new InMemoryComposer("Unknown Composer");
 		} else {
@@ -157,4 +176,5 @@ public class InMemorySong implements Song {
 		// TODO Override Object method
 		return super.hashCode();
 	}
+
 }

@@ -7,9 +7,9 @@ import java.util.Date;
 
 import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
-import br.study.ebah.miguel.cdsCatalog.elements.Artist;
-import br.study.ebah.miguel.cdsCatalog.elements.Composer;
-import br.study.ebah.miguel.cdsCatalog.elements.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.entities.Composer;
+import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 
 /**
  * @author miguel

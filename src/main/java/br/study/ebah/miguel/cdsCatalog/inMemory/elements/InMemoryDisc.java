@@ -8,9 +8,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import br.study.ebah.miguel.cdsCatalog.elements.Artist;
-import br.study.ebah.miguel.cdsCatalog.elements.Disc;
-import br.study.ebah.miguel.cdsCatalog.elements.Song;
+import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.entities.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
 /**
  * @author miguel
@@ -45,7 +46,7 @@ public class InMemoryDisc implements Disc {
 	/*
 	 * 
 	 */
-	public InMemoryDisc(Disc other) {
+	public InMemoryDisc(Disc other) throws RepositoryException {
 		this.name = other.getName();
 
 		this.songs = Collections.synchronizedList(new ArrayList<Song>());
@@ -61,6 +62,25 @@ public class InMemoryDisc implements Disc {
 		}
 
 		this.releaseDate = other.getReleaseDate();
+	}
+	
+
+	/*
+	 * 
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
+	 */
+	public int getId() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/*
+	 * 
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
+	 */
+	public boolean isTransient() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	/*
@@ -83,7 +103,7 @@ public class InMemoryDisc implements Disc {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getMainArtist()
 	 */
-	public Artist getMainArtist() {
+	public Artist getMainArtist() throws RepositoryException {
 		if (this.mainArtist == null) {
 			return new InMemoryArtist("Unknown Main Artist");
 		} else {

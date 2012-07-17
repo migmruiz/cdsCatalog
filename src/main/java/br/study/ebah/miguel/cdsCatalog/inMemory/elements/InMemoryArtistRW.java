@@ -7,9 +7,10 @@ import java.util.Date;
 
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
-import br.study.ebah.miguel.cdsCatalog.elements.Artist;
-import br.study.ebah.miguel.cdsCatalog.elements.Disc;
-import br.study.ebah.miguel.cdsCatalog.elements.Song;
+import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.entities.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
 /**
  * @author miguel
@@ -34,7 +35,7 @@ public class InMemoryArtistRW extends InMemoryArtist implements IsWritable {
 	/*
 	 * 
 	 */
-	public InMemoryArtistRW(Artist other) {
+	public InMemoryArtistRW(Artist other) throws RepositoryException {
 		super(other);
 	}
 

@@ -13,7 +13,8 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.Before;
 
-import br.study.ebah.miguel.cdsCatalog.elements.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Disc;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.sql.access.SQLDBNoDataException;
 import br.study.ebah.miguel.cdsCatalog.sql.elements.MySQLDisc;
 
@@ -40,7 +41,7 @@ public class MySQLDiscTest {
 	}
 
 	@Test
-	public void getMainArtistTest() {
+	public void getMainArtistTest() throws RepositoryException {
 		Assert.assertNotNull(disc.getMainArtist().getName());
 	}
 
