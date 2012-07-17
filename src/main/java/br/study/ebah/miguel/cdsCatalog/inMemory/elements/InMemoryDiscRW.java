@@ -6,10 +6,11 @@ package br.study.ebah.miguel.cdsCatalog.inMemory.elements;
 import java.util.Date;
 
 import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
+import br.study.ebah.miguel.cdsCatalog.actions.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
-import br.study.ebah.miguel.cdsCatalog.elements.Artist;
-import br.study.ebah.miguel.cdsCatalog.elements.Disc;
-import br.study.ebah.miguel.cdsCatalog.elements.Song;
+import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.entities.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
 
 /**
  * @author miguel
@@ -34,7 +35,7 @@ public class InMemoryDiscRW extends InMemoryDisc implements IsWritable {
 	/*
 	 * 
 	 */
-	public InMemoryDiscRW(Disc other) {
+	public InMemoryDiscRW(Disc other) throws RepositoryException {
 		super(other);
 	}
 

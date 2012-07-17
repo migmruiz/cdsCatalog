@@ -14,9 +14,9 @@ import javax.annotation.Nonnull;
 import com.google.common.base.Preconditions;
 
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
-import br.study.ebah.miguel.cdsCatalog.elements.Artist;
-import br.study.ebah.miguel.cdsCatalog.elements.Disc;
-import br.study.ebah.miguel.cdsCatalog.elements.Song;
+import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.entities.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
 import br.study.ebah.miguel.cdsCatalog.inMemory.elements.InMemoryArtistRW;
 import br.study.ebah.miguel.cdsCatalog.sql.access.MySQLConnectionFactory;
 import br.study.ebah.miguel.cdsCatalog.sql.access.SQLDBNoDataException;
@@ -80,6 +80,25 @@ public class MySQLArtist implements Artist, AutoCloseable {
 				throw new SQLDBNoDataException("no data on artist table");
 			}
 		}
+	}
+	
+
+	/*
+	 * 
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
+	 */
+	public int getId() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	/*
+	 * 
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
+	 */
+	  public boolean isTransient() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	private final void setupGlobal() throws SQLException, ClassNotFoundException {

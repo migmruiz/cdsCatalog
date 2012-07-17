@@ -1,7 +1,7 @@
 /**
  * 
  */
-package br.study.ebah.miguel.cdsCatalog.elements;
+package br.study.ebah.miguel.cdsCatalog.entities;
 
 /**
  * @author miguel

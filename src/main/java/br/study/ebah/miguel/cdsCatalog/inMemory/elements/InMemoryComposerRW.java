@@ -6,10 +6,11 @@ package br.study.ebah.miguel.cdsCatalog.inMemory.elements;
 import java.util.Date;
 
 import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
+import br.study.ebah.miguel.cdsCatalog.actions.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
-import br.study.ebah.miguel.cdsCatalog.elements.Composer;
-import br.study.ebah.miguel.cdsCatalog.elements.Disc;
-import br.study.ebah.miguel.cdsCatalog.elements.Song;
+import br.study.ebah.miguel.cdsCatalog.entities.Composer;
+import br.study.ebah.miguel.cdsCatalog.entities.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
 
 /**
  * @author miguel
@@ -20,7 +21,7 @@ public class InMemoryComposerRW extends InMemoryComposer implements IsWritable {
 	/*
 	 * 
 	 */
-	public InMemoryComposerRW(Composer other) {
+	public InMemoryComposerRW(Composer other) throws RepositoryException {
 		super(other);
 	}
 
