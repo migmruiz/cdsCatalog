@@ -1,9 +1,11 @@
-package br.study.ebah.miguel.cdsCatalog.repo;
+package br.study.ebah.miguel.cdsCatalog.repo.impl;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.repo.Repository;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
@@ -15,7 +17,7 @@ import com.google.common.cache.CacheBuilder;
  * @author bruno
  *
  */
-class ArtistRepository implements Repository<Artist> {
+public class ArtistRepository implements Repository<Artist> {
 	private static final Cache<Integer, Artist> cache = CacheBuilder
 			.newBuilder().build();
 

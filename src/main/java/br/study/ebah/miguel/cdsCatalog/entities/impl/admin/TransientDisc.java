@@ -1,23 +1,27 @@
 /**
  * 
  */
-package br.study.ebah.miguel.cdsCatalog.inMemory.elements;
+package br.study.ebah.miguel.cdsCatalog.entities.impl.admin;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 
 /**
  * @author miguel
  * 
  */
-public class InMemoryDisc implements Disc {
+public class TransientDisc implements Disc {
 	private final String name;
 	final List<Song> songs;
 	final List<Artist> artists;
@@ -27,14 +31,14 @@ public class InMemoryDisc implements Disc {
 	/*
 	 * 
 	 */
-	public InMemoryDisc(String name) {
+	public TransientDisc(String name) {
 		this(name, null);
 	}
 
 	/*
 	 * 
 	 */
-	public InMemoryDisc(String name, Date releaseDate) {
+	public TransientDisc(String name, Date releaseDate) {
 		this.name = name;
 
 		this.songs = Collections.synchronizedList(new ArrayList<Song>());
@@ -46,7 +50,7 @@ public class InMemoryDisc implements Disc {
 	/*
 	 * 
 	 */
-	public InMemoryDisc(Disc other) throws RepositoryException {
+	public TransientDisc(Disc other) throws RepositoryException {
 		this.name = other.getName();
 
 		this.songs = Collections.synchronizedList(new ArrayList<Song>());
@@ -63,7 +67,6 @@ public class InMemoryDisc implements Disc {
 
 		this.releaseDate = other.getReleaseDate();
 	}
-	
 
 	/*
 	 * 
@@ -103,11 +106,14 @@ public class InMemoryDisc implements Disc {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getMainArtist()
 	 */
-	public Artist getMainArtist() throws RepositoryException {
+	public Artist getMainArtist() throws RepositoryException,
+			ExecutionException {
 		if (this.mainArtist == null) {
-			return new InMemoryArtist("Unknown Main Artist");
+			return new TransientArtist("Unknown Main Artist",
+					RepositoryType.InMemory);
 		} else {
-			return new InMemoryArtist(this.mainArtist);
+			return RepositoryFactory.getRepository(Artist.class,
+					RepositoryType.InMemory).getById(this.mainArtist.getId());
 		}
 	}
 
@@ -150,7 +156,7 @@ public class InMemoryDisc implements Disc {
 		// TODO Override Object method
 		return getClass().getName() + "@" + Integer.toHexString(hashCode());
 	}
-	
+
 	/*
 	 * 
 	 * @see java.lang.Object#toString()
