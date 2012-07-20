@@ -9,6 +9,8 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
+import br.study.ebah.miguel.cdsCatalog.sql.MySQLConnectionFactory;
+
 /**
  * @author miguel
  * 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package br.study.ebah.miguel.cdsCatalog.sql.access;
+package br.study.ebah.miguel.cdsCatalog.sql;
 
 /**
  * Thrown to indicate that a method has no data on used database.

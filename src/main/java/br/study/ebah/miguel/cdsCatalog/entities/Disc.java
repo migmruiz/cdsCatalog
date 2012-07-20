@@ -4,6 +4,7 @@
 package br.study.ebah.miguel.cdsCatalog.entities;
 
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
@@ -25,7 +26,7 @@ public interface Disc extends Entity {
 	/*
 	 * 
 	 */
-	public Artist getMainArtist() throws RepositoryException;
+	public Artist getMainArtist() throws RepositoryException, ExecutionException;
 
 	/*
 	 * 

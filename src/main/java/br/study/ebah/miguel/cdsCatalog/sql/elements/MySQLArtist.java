@@ -8,18 +8,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
-
-import com.google.common.base.Preconditions;
 
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
-import br.study.ebah.miguel.cdsCatalog.inMemory.elements.InMemoryArtistRW;
-import br.study.ebah.miguel.cdsCatalog.sql.access.MySQLConnectionFactory;
-import br.study.ebah.miguel.cdsCatalog.sql.access.SQLDBNoDataException;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
+import br.study.ebah.miguel.cdsCatalog.sql.MySQLConnectionFactory;
+import br.study.ebah.miguel.cdsCatalog.sql.SQLDBNoDataException;
+
+import com.google.common.base.Preconditions;
 
 /**
  * @author miguel
@@ -29,7 +33,7 @@ public class MySQLArtist implements Artist, AutoCloseable {
 	private final String name;
 	private final long id;
 
-	private InMemoryArtistRW artist;
+	private TransientArtist artist;
 	private Writable<Disc> discWritableArtist;
 
 	private Connection con;
@@ -43,7 +47,7 @@ public class MySQLArtist implements Artist, AutoCloseable {
 	 * 
 	 */
 	public MySQLArtist(@Nonnull String name) throws SQLException,
-			SQLDBNoDataException, ClassNotFoundException {
+			SQLDBNoDataException, ClassNotFoundException, ExecutionException {
 		setupGlobal();
 		Preconditions.checkNotNull(name, "name cannot be null");
 		this.name = name;
@@ -65,7 +69,7 @@ public class MySQLArtist implements Artist, AutoCloseable {
 	 * 
 	 */
 	public MySQLArtist(@Nonnull Long id) throws SQLException,
-			SQLDBNoDataException, ClassNotFoundException {
+			SQLDBNoDataException, ClassNotFoundException, ExecutionException {
 		setupGlobal();
 		Preconditions.checkNotNull(id, "id cannot be null");
 		this.id = id.longValue();
@@ -81,7 +85,6 @@ public class MySQLArtist implements Artist, AutoCloseable {
 			}
 		}
 	}
-	
 
 	/*
 	 * 
@@ -96,12 +99,13 @@ public class MySQLArtist implements Artist, AutoCloseable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
 	 */
-	  public boolean isTransient() {
+	public boolean isTransient() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	private final void setupGlobal() throws SQLException, ClassNotFoundException {
+	private final void setupGlobal() throws SQLException,
+			ClassNotFoundException {
 		this.connFact = new MySQLConnectionFactory();
 		this.con = connFact.getConnection();
 		this.nameStmt = con
@@ -114,13 +118,14 @@ public class MySQLArtist implements Artist, AutoCloseable {
 		this.discsAreSetted = false;
 	}
 
-	private void setupArtist(ResultSet rs) throws SQLException {
+	private void setupArtist(ResultSet rs) throws SQLException,
+			ExecutionException {
 		java.sql.Date birthdaySQL = rs.getDate("birthday");
 		if (birthdaySQL == null) {
-			this.artist = new InMemoryArtistRW(this.name);
+			this.artist = new TransientArtist(this.name, RepositoryType.MySQL);
 		} else {
-			this.artist = new InMemoryArtistRW(this.name, new Date(
-					birthdaySQL.getTime()));
+			this.artist = new TransientArtist(this.name, new Date(
+					birthdaySQL.getTime()), RepositoryType.MySQL);
 		}
 		// long mainDiscID = rs.getLong("id_disc");
 		this.discWritableArtist = this.artist.asWritable(Disc.class);
@@ -141,17 +146,22 @@ public class MySQLArtist implements Artist, AutoCloseable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getKnownDiscs()
 	 */
-	public Iterable<Disc> getKnownDiscs() {
+	public Iterable<Disc> getKnownDiscs() throws RepositoryException,
+			ExecutionException {
 		if (!this.discsAreSetted)
 			try {
 				workingOnDiscsStmt.setLong(1, this.id);
 				try (ResultSet discs_rs = workingOnDiscsStmt.executeQuery()) {
 					while (discs_rs.next()) {
-						this.discWritableArtist.add(new MySQLDisc(discs_rs
-								.getLong("id_artist")));
+						this.discWritableArtist
+								.add(RepositoryFactory.getRepository(
+										Disc.class, RepositoryType.MySQL)
+										.getById(
+												(int) discs_rs
+														.getLong("id_artist")));
 					}
 				}
-			} catch (SQLException | ClassNotFoundException e) {
+			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		this.discsAreSetted = true;
