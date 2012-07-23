@@ -11,6 +11,6 @@ public interface Writable<T> {
 	/*
 	 * 
 	 */
-	void add(T type);
+	void add(Long l);
 
 }

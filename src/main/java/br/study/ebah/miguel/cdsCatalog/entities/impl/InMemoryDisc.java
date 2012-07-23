@@ -72,9 +72,9 @@ public class InMemoryDisc implements Disc {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
 	 */
-	public int getId() {
+	public Long getId() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 0L;
 	}
 
 	/*
@@ -109,7 +109,8 @@ public class InMemoryDisc implements Disc {
 	public Artist getMainArtist() throws RepositoryException,
 			ExecutionException {
 		if (this.mainArtist == null) {
-			return new TransientArtist("Unknown Main Artist", RepositoryType.InMemory);
+			return new TransientArtist("Unknown Main Artist",
+					RepositoryType.InMemory);
 		} else {
 			return RepositoryFactory.getRepository(Artist.class,
 					RepositoryType.InMemory).getById(this.mainArtist.getId());

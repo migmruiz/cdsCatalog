@@ -16,11 +16,11 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
  * 
  */
 class ArtistFromRepo implements Artist {
-	private final int id;
+	private final Long id;
 
 	private final Artist artist;
 
-	ArtistFromRepo(final Integer id, RepositoryType store)
+	ArtistFromRepo(final Long id, RepositoryType store)
 			throws RepositoryException, ExecutionException {
 
 		this.id = id;
@@ -34,7 +34,7 @@ class ArtistFromRepo implements Artist {
 	}
 
 	@Override
-	public int getId() {
+	public Long getId() {
 		return this.id;
 	}
 

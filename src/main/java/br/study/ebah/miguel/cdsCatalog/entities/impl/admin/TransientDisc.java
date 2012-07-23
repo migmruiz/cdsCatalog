@@ -72,9 +72,9 @@ public class TransientDisc implements Disc {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
 	 */
-	public int getId() {
+	public Long getId() {
 		// TODO Auto-generated method stub
-		return 0;
+		return 0L;
 	}
 
 	/*
