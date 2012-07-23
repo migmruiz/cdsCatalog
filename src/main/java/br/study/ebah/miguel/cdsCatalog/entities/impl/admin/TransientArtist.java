@@ -29,11 +29,11 @@ import com.google.common.base.Optional;
  * 
  */
 public class TransientArtist implements Artist, IsWritable {
-	private Optional<Integer> id = Optional.absent();
+	private Optional<Long> id = Optional.absent();
 	private final String name;
-	protected final List<Integer> knownSongsIds;
-	protected final List<Integer> knownDiscsIds;
-	protected final List<Integer> knownMainDiscsIds;
+	protected final List<Long> knownSongsIds;
+	protected final List<Long> knownDiscsIds;
+	protected final List<Long> knownMainDiscsIds;
 	private final Date birthday;
 
 	private final Repository<Song> songRepository;
@@ -59,11 +59,11 @@ public class TransientArtist implements Artist, IsWritable {
 		this.name = name;
 
 		this.knownSongsIds = Collections
-				.synchronizedList(new ArrayList<Integer>());
+				.synchronizedList(new ArrayList<Long>());
 		this.knownDiscsIds = Collections
-				.synchronizedList(new ArrayList<Integer>());
+				.synchronizedList(new ArrayList<Long>());
 		this.knownMainDiscsIds = Collections
-				.synchronizedList(new ArrayList<Integer>());
+				.synchronizedList(new ArrayList<Long>());
 
 		this.discRepository = RepositoryFactory
 				.getRepository(Disc.class, store);
@@ -78,8 +78,8 @@ public class TransientArtist implements Artist, IsWritable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
 	 */
-	public int getId() {
-		return id.or(-1);
+	public Long getId() {
+		return id.or(-1L);
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class TransientArtist implements Artist, IsWritable {
 	 * 
 	 * @param id
 	 */
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = Optional.of(id);
 	}
 
@@ -103,16 +103,16 @@ public class TransientArtist implements Artist, IsWritable {
 		if (type == Song.class) {
 			return (Writable<T>) new Writable<Song>() {
 
-				public void add(Song t) {
-					knownSongs.add(t);
+				public void add(Long t) {
+					knownSongsIds.add(t);
 				}
 
 			};
 		} else if (type == Disc.class) {
 			return (Writable<T>) new Writable<Disc>() {
 
-				public void add(Disc t) {
-					knownDiscs.add(t);
+				public void add(Long t) {
+					knownDiscsIds.add(t);
 				}
 
 			};
@@ -144,7 +144,7 @@ public class TransientArtist implements Artist, IsWritable {
 	public Iterable<Song> getKnownSongs() {
 		if (this.knownSongs == null) {
 			knownSongs = new ArrayList<>();
-			for (Integer songId : this.knownSongsIds) {
+			for (Long songId : this.knownSongsIds) {
 				try {
 					knownSongs.add(this.songRepository.getById(songId));
 				} catch (RepositoryException e) {
@@ -162,7 +162,7 @@ public class TransientArtist implements Artist, IsWritable {
 	public Iterable<Disc> getKnownDiscs() {
 		if (this.knownDiscs == null) {
 			knownDiscs = new ArrayList<>();
-			for (Integer discId : this.knownDiscsIds) {
+			for (Long discId : this.knownDiscsIds) {
 				try {
 					knownDiscs.add(this.discRepository.getById(discId));
 				} catch (RepositoryException e) {
@@ -180,7 +180,7 @@ public class TransientArtist implements Artist, IsWritable {
 	public Iterable<Disc> getKnownMainDiscs() {
 		if (this.knownMainDiscs == null) {
 			knownMainDiscs = new ArrayList<>();
-			for (Integer discId : this.knownMainDiscsIds) {
+			for (Long discId : this.knownMainDiscsIds) {
 				try {
 					knownMainDiscs.add(this.discRepository.getById(discId));
 				} catch (RepositoryException e) {
@@ -189,6 +189,18 @@ public class TransientArtist implements Artist, IsWritable {
 			}
 		}
 		return this.knownMainDiscs;
+	}
+
+	/*
+	 * 
+	 */
+	public void setMain(Long discId) {
+		if (this.knownDiscsIds.contains(discId)) {
+			this.knownMainDiscsIds.add(discId);
+		} else {
+			throw new UnsupportedOperationException(
+					"discId must be under knownDiscsIds first");
+		}
 	}
 
 	/*

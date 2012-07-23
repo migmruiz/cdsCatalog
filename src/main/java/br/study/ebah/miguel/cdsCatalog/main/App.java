@@ -18,7 +18,7 @@ public class App {
 					RepositoryType.InMemory);
 			Disc disc = new InMemoryDisc("", new Date());
 			System.out.println("Adding disc: " + disc);
-			artist.asWritable(Disc.class).add(disc);
+			artist.asWritable(Disc.class).add(disc.getId());
 			System.out.println("Artist's known discs: "
 					+ artist.getKnownDiscs());
 		} catch (Exception e) {

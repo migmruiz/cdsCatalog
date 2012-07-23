@@ -3,40 +3,39 @@ package br.study.ebah.miguel.cdsCatalog.repo.impl;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
+import javax.annotation.Nonnull;
+
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
+import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 
 import com.google.common.base.Optional;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-
 /**
  * 
  * @author bruno
- *
+ * 
  */
-public class ArtistRepository implements Repository<Artist> {
-	private static final Cache<Integer, Artist> cache = CacheBuilder
-			.newBuilder().build();
+public class InMemoryArtistRepository implements Repository<Artist> {
+	private static final Cache<Long, Artist> cache = CacheBuilder.newBuilder()
+			.build();
 
 	@Override
-	public Artist getById(final int id) throws RepositoryException {
+	public Artist getById(@Nonnull final Long id) throws RepositoryException {
 		try {
 			return cache.get(id, new Callable<Artist>() {
-				@SuppressWarnings("unused")
 				@Override
 				public Artist call() throws Exception {
-					// Connection c = ...
-					// Artist a = c.query(....select....);
-					// cache.put(id, a);
+					Artist a = new TransientArtist(null,
+							RepositoryType.InMemory);
+					cache.put(id, a);
 					// return a;
-					if (1 > 0) {
-						return null;
-					} else {
-						throw new UnsupportedOperationException();
-					}
+					return null;
+
 				}
 			});
 		} catch (ExecutionException e) {
@@ -46,15 +45,11 @@ public class ArtistRepository implements Repository<Artist> {
 
 	@Override
 	public Artist save(final Artist artist) throws RepositoryException {
-		Optional<Integer> id = Optional.absent();
-		if (artist.isTransient()) {
-			// insert ....
-			Optional.of(123); // id gerado pelo banco ....
-		} else {
-			// update ....
-			// cache.invalidate(artist.getId());
+		Optional<Long> id = Optional.absent();
+		id = Optional.of(artist.getId());
+		if (!artist.isTransient()) {
+			cache.invalidate(id.get());
 		}
-
 		return getById(id.get());
 	}
 
@@ -62,5 +57,14 @@ public class ArtistRepository implements Repository<Artist> {
 	public void delete(final Artist artist) {
 		// delete from tabela ....
 		cache.invalidate(artist.getId());
+	}
+
+	/*
+	 * 
+	 * @see java.lang.AutoCloseable#close()
+	 */
+	@Override
+	public void close() throws Exception {
+		cache.cleanUp();
 	}
 }
