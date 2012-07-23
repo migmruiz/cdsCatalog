@@ -12,84 +12,91 @@ import java.util.concurrent.ExecutionException;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
+import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
+
+import com.google.common.base.Optional;
 
 /**
  * @author miguel
  * 
  */
 public class TransientDisc implements Disc {
+	// TODO implement IsWritable
+	private Optional<Long> id = Optional.absent();
 	private final String name;
-	final List<Song> songs;
-	final List<Artist> artists;
-	Artist mainArtist;
+	private final List<Long> songsIds;
+	private final List<Long> artistsIds;
+	private final Optional<Long> mainArtistId = Optional.absent();
 	private final Date releaseDate;
+
+	private final Repository<Artist> artistRepository;
+	private final Repository<Song> songRepository;
+
+	private List<Song> songs;
+	private List<Artist> artists;
+	private Artist mainArtist;
 
 	/*
 	 * 
 	 */
-	public TransientDisc(String name) {
-		this(name, null);
+	public TransientDisc(String name, RepositoryType repoType)
+			throws ExecutionException {
+		this(name, null, repoType);
 	}
 
 	/*
 	 * 
 	 */
-	public TransientDisc(String name, Date releaseDate) {
+	public TransientDisc(String name, Date releaseDate, RepositoryType repoType)
+			throws ExecutionException {
 		this.name = name;
 
-		this.songs = Collections.synchronizedList(new ArrayList<Song>());
-		this.artists = Collections.synchronizedList(new ArrayList<Artist>());
+		this.songsIds = Collections.synchronizedList(new ArrayList<Long>());
+		this.artistsIds = Collections.synchronizedList(new ArrayList<Long>());
+
+		this.artistRepository = RepositoryFactory.getRepository(Artist.class,
+				repoType);
+		this.songRepository = RepositoryFactory.getRepository(Song.class,
+				repoType);
 
 		this.releaseDate = releaseDate;
 	}
 
 	/*
 	 * 
-	 */
-	public TransientDisc(Disc other) throws RepositoryException {
-		this.name = other.getName();
-
-		this.songs = Collections.synchronizedList(new ArrayList<Song>());
-		Iterable<Song> otherSongs = other.getSongs();
-		for (Song song : otherSongs) {
-			this.songs.add(song);
-		}
-
-		this.artists = Collections.synchronizedList(new ArrayList<Artist>());
-		Iterable<Artist> otherArtists = other.getArtists();
-		for (Artist artist : otherArtists) {
-			this.artists.add(artist);
-		}
-
-		this.releaseDate = other.getReleaseDate();
-	}
-
-	/*
-	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
 	 */
+	@Override
 	public Long getId() {
-		// TODO Auto-generated method stub
-		return 0L;
+		return id.get();
+	}
+
+	/**
+	 * Admin access only
+	 * 
+	 * @param id
+	 */
+	public void setId(Long id) {
+		this.id = Optional.of(id);
 	}
 
 	/*
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
 	 */
+	@Override
 	public boolean isTransient() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	/*
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getName()
 	 */
+	@Override
 	public String getName() {
 		return this.name;
 	}
@@ -98,7 +105,18 @@ public class TransientDisc implements Disc {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getArtists()
 	 */
+	@Override
 	public Iterable<Artist> getArtists() {
+		if (this.artists == null) {
+			artists = new ArrayList<>();
+			for (Long artistId : this.artistsIds) {
+				try {
+					artists.add(this.artistRepository.getById(artistId));
+				} catch (RepositoryException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		return this.artists;
 	}
 
@@ -106,28 +124,38 @@ public class TransientDisc implements Disc {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getMainArtist()
 	 */
+	@Override
 	public Artist getMainArtist() throws RepositoryException,
 			ExecutionException {
 		if (this.mainArtist == null) {
-			return new TransientArtist("Unknown Main Artist",
-					RepositoryType.InMemory);
-		} else {
-			return RepositoryFactory.getRepository(Artist.class,
-					RepositoryType.InMemory).getById(this.mainArtist.getId());
+			mainArtist = this.artistRepository.getById(this.mainArtistId.get());
 		}
+		return this.mainArtist;
 	}
 
 	/*
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getSongs()
 	 */
+	@Override
 	public Iterable<Song> getSongs() {
+		if (this.songs == null) {
+			songs = new ArrayList<>();
+			for (Long songId : this.songsIds) {
+				try {
+					songs.add(this.songRepository.getById(songId));
+				} catch (RepositoryException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		return this.songs;
 	}
 
 	/*
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getReleaseDate()
 	 */
+	@Override
 	public Date getReleaseDate() {
 		if (this.releaseDate == null) {
 			System.err.println("Unknown release date.");

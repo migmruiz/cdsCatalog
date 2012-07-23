@@ -5,8 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
 
-import br.study.ebah.miguel.cdsCatalog.entities.Artist;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentArtist;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentSong;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
@@ -15,11 +15,11 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
  * @author miguel
  * 
  */
-public class InMemoryArtistRepository implements Repository<Artist> {
-	private static final Map<Long, Artist> map = new ConcurrentHashMap<>();
+public class InMemorySongRepository implements Repository<Song> {
+	private static final Map<Long, Song> map = new ConcurrentHashMap<>();
 
 	@Override
-	public Artist getById(@Nonnull final Long id) throws RepositoryException {
+	public Song getById(@Nonnull final Long id) throws RepositoryException {
 		if (map.containsKey(id)) {
 			return map.get(id);
 		} else {
@@ -29,25 +29,25 @@ public class InMemoryArtistRepository implements Repository<Artist> {
 	}
 
 	@Override
-	public Artist save(@Nonnull final Artist artist) throws RepositoryException {
+	public Song save(@Nonnull final Song song) throws RepositoryException {
 		try {
-			Artist persistentArtist;
-			if (artist.isTransient()) {
-				persistentArtist = new PersistentArtist(artist);
+			Song persistentSong;
+			if (song.isTransient()) {
+				persistentSong = new PersistentSong(song);
 			} else {
-				persistentArtist = artist;
+				persistentSong = song;
 			}
-			map.put(persistentArtist.getId(), artist);
-			return persistentArtist;
+			map.put(persistentSong.getId(), song);
+			return persistentSong;
 		} catch (Exception e) {
 			throw new RepositoryException(e);
 		}
 	}
 
 	@Override
-	public void delete(@Nonnull final Artist artist) throws RepositoryException {
+	public void delete(@Nonnull final Song song) throws RepositoryException {
 		try {
-			map.remove(artist.getId());
+			map.remove(song.getId());
 		} catch (Exception e) {
 			throw new RepositoryException(e);
 		}
