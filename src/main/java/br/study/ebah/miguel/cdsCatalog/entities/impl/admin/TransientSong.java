@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
+import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Composer;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
@@ -24,8 +26,7 @@ import com.google.common.base.Optional;
  * @author miguel
  * 
  */
-public class TransientSong implements Song {
-	// TODO implement IsWritable
+public class TransientSong implements Song, IsWritable {
 	private Optional<Long> id = Optional.absent();
 	private final String name;
 	private final List<Long> knownDiscsIds;
@@ -173,7 +174,53 @@ public class TransientSong implements Song {
 		}
 		return this.knownDiscs;
 	}
+	
 
+	/*
+	 * 
+	 * @see
+	 * br.study.ebah.miguel.cdsCatalog.actions.IsWritable#asAddable(java.lang
+	 * .Class)
+	 */
+	@Override
+	@SuppressWarnings(value = "unchecked")
+	public <T> Writable<T> asWritable(Class<T> type)
+			throws IllegalArgumentException {
+		if (type == Disc.class) {
+			return (Writable<T>) new Writable<Disc>() {
+
+				@Override
+				public void add(Disc t) throws RepositoryException {
+					add(t.getId());
+					discRepository.save(t);
+				}
+
+				@Override
+				public void add(Long l) {
+					knownDiscsIds.add(l);
+				}
+
+			};
+		} else if (type == Disc.class) {
+			return (Writable<T>) new Writable<Disc>() {
+
+				@Override
+				public void add(Disc t) throws RepositoryException {
+					add(t.getId());
+					discRepository.save(t);
+				}
+
+				@Override
+				public void add(Long l) {
+					knownDiscsIds.add(l);
+				}
+
+			};
+		} else {
+			throw new IllegalArgumentException();
+		}
+	}
+	
 	/*
 	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -203,5 +250,6 @@ public class TransientSong implements Song {
 		// TODO Override Object method
 		return super.hashCode();
 	}
+
 
 }

@@ -31,7 +31,7 @@ import com.google.common.base.Optional;
 public class TransientArtist implements Artist, IsWritable {
 	private Optional<Long> id = Optional.absent();
 	private final String name;
-	private final List<Long> knownSongsIds;
+	protected final List<Long> knownSongsIds;
 	private final List<Long> knownDiscsIds;
 	private final List<Long> knownMainDiscsIds;
 	private final Date birthday;

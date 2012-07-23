@@ -9,6 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
+import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
@@ -23,8 +25,7 @@ import com.google.common.base.Optional;
  * @author miguel
  * 
  */
-public class TransientDisc implements Disc {
-	// TODO implement IsWritable
+public class TransientDisc implements Disc, IsWritable {
 	private Optional<Long> id = Optional.absent();
 	private final String name;
 	private final List<Long> songsIds;
@@ -162,6 +163,51 @@ public class TransientDisc implements Disc {
 			return new Date();
 		} else {
 			return (Date) this.releaseDate.clone();
+		}
+	}
+
+	/*
+	 * 
+	 * @see
+	 * br.study.ebah.miguel.cdsCatalog.actions.IsWritable#asAddable(java.lang
+	 * .Class)
+	 */
+	@Override
+	@SuppressWarnings(value = "unchecked")
+	public <T> Writable<T> asWritable(Class<T> type)
+			throws IllegalArgumentException {
+		if (type == Song.class) {
+			return (Writable<T>) new Writable<Song>() {
+
+				@Override
+				public void add(Song t) throws RepositoryException {
+					add(t.getId());
+					songRepository.save(t);
+				}
+
+				@Override
+				public void add(Long l) {
+					songsIds.add(l);
+				}
+
+			};
+		} else if (type == Artist.class) {
+			return (Writable<T>) new Writable<Artist>() {
+
+				@Override
+				public void add(Artist t) throws RepositoryException {
+					add(t.getId());
+					artistRepository.save(t);
+				}
+
+				@Override
+				public void add(Long l) {
+					artistsIds.add(l);
+				}
+
+			};
+		} else {
+			throw new IllegalArgumentException();
 		}
 	}
 
