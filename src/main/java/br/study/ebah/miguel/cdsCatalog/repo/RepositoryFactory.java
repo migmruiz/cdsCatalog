@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutionException;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Entity;
-import br.study.ebah.miguel.cdsCatalog.repo.impl.InMemoryArtistRepository;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.InMemoryRepository;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.MySQLArtistRepository;
 
 import com.google.common.cache.Cache;
@@ -31,13 +31,7 @@ public final class RepositoryFactory {
 					public Repository<T> call() throws Exception {
 						switch (store) {
 						case InMemory:
-							if (t == Artist.class) {
-								return (Repository<T>) new InMemoryArtistRepository();
-							} else {
-								throw new AssertionError(
-										"Repository is not set for this entity"
-												+ " of InMemory RepositoryType");
-							}
+							return new InMemoryRepository<T>();
 
 						case MySQL:
 							if (t == Artist.class) {

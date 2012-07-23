@@ -3,8 +3,6 @@ package br.study.ebah.miguel.cdsCatalog.entities.impl;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-import javax.annotation.Nonnull;
-
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
@@ -14,28 +12,28 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 
 /**
  * 
- * @author bruno, miguel
+ * @author miguel
  * 
  */
-class ArtistFromRepo implements Artist {
+class DiscFromRepo implements Disc {
 	private final Long id;
 
-	private final Artist artist;
+	private final Disc disc;
 
-	public ArtistFromRepo(@Nonnull final Long id, @Nonnull RepositoryType store)
+	DiscFromRepo(final Long id, RepositoryType store)
 			throws RepositoryException, ExecutionException {
 
 		this.id = id;
-		this.artist = RepositoryFactory.getRepository(Artist.class, store)
+		this.disc = RepositoryFactory.getRepository(Disc.class, store)
 				.getById(id);
 	}
 
 	@Override
 	public String getName() {
-		return this.artist.getName();
+		return this.disc.getName();
 	}
 
-	@Override @Nonnull
+	@Override
 	public Long getId() {
 		return this.id;
 	}
@@ -46,23 +44,24 @@ class ArtistFromRepo implements Artist {
 	}
 
 	@Override
-	public Iterable<Song> getKnownSongs() throws RepositoryException {
-		return this.artist.getKnownSongs();
+	public Iterable<Artist> getArtists() throws RepositoryException {
+		return this.disc.getArtists();
 	}
 
 	@Override
-	public Iterable<Disc> getKnownDiscs() throws RepositoryException,
+	public Artist getMainArtist() throws RepositoryException,
 			ExecutionException {
-		return this.artist.getKnownDiscs();
+		return this.disc.getMainArtist();
 	}
 
 	@Override
-	public Iterable<Disc> getKnownMainDiscs() throws RepositoryException {
-		return this.artist.getKnownMainDiscs();
+	public Iterable<Song> getSongs() throws RepositoryException {
+		return this.disc.getSongs();
 	}
 
 	@Override
-	public Date getBirthday() {
-		return this.artist.getBirthday();
+	public Date getReleaseDate() {
+		return this.disc.getReleaseDate();
 	}
+
 }

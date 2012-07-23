@@ -28,6 +28,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+// TODO olhar as seguintes implementações do ebah
+//br.com.ebah.resourcepool.SimplePool<R extends AutoCloseable>
+//br.com.ebah.jdbc.newjdbc.DbConnectionPool extends SimplePool<DbConnection>
+//br.com.ebah.jdbc.newjdbc.raw.RawDbConnectionPool extends SimplePool<Connection>
+//e olhar o canônico ConnectionPool C3P0
+
 public class MySQLArtistRepository implements Repository<Artist> {
 	private static final Cache<Long, Artist> cache;
 

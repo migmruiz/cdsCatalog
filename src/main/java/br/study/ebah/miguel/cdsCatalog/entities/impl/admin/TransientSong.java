@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.entities.Composer;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
@@ -25,25 +26,25 @@ import com.google.common.base.Optional;
  * @author miguel
  * 
  */
-public class TransientDisc implements Disc, IsWritable {
+public class TransientSong implements Song, IsWritable {
 	private Optional<Long> id = Optional.absent();
 	private final String name;
-	private final List<Long> songsIds;
-	private final List<Long> artistsIds;
-	private final Optional<Long> mainArtistId = Optional.absent();
-	private final Date releaseDate;
+	private final List<Long> knownDiscsIds;
+	private final List<Long> knownArtistsIds;
+	private final Optional<Long> composerId = Optional.absent();
+	private final Date firstReleaseDate;
 
 	private final Repository<Artist> artistRepository;
-	private final Repository<Song> songRepository;
+	private final Repository<Disc> discRepository;
 
-	private List<Song> songs;
-	private List<Artist> artists;
-	private Artist mainArtist;
+	private List<Disc> knownDiscs;
+	private List<Artist> knownArtists;
+	private Composer composer;
 
 	/*
 	 * 
 	 */
-	public TransientDisc(String name, RepositoryType repoType)
+	public TransientSong(String name, RepositoryType repoType)
 			throws ExecutionException {
 		this(name, null, repoType);
 	}
@@ -51,26 +52,27 @@ public class TransientDisc implements Disc, IsWritable {
 	/*
 	 * 
 	 */
-	public TransientDisc(String name, Date releaseDate, RepositoryType repoType)
+	public TransientSong(String name, Date releaseDate, RepositoryType repoType)
 			throws ExecutionException {
 		this.name = name;
 
-		this.songsIds = Collections.synchronizedList(new ArrayList<Long>());
-		this.artistsIds = Collections.synchronizedList(new ArrayList<Long>());
+		this.knownDiscsIds = Collections
+				.synchronizedList(new ArrayList<Long>());
+		this.knownArtistsIds = Collections
+				.synchronizedList(new ArrayList<Long>());
 
 		this.artistRepository = RepositoryFactory.getRepository(Artist.class,
 				repoType);
-		this.songRepository = RepositoryFactory.getRepository(Song.class,
+		this.discRepository = RepositoryFactory.getRepository(Disc.class,
 				repoType);
 
-		this.releaseDate = releaseDate;
+		this.firstReleaseDate = releaseDate;
 	}
 
 	/*
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
 	 */
-	@Override
 	public Long getId() {
 		return id.get();
 	}
@@ -88,14 +90,13 @@ public class TransientDisc implements Disc, IsWritable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
 	 */
-	@Override
 	public boolean isTransient() {
 		return true;
 	}
 
 	/*
 	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getName()
+	 * @see br.study.ebah.miguel.cdsCatalog.elements.Song#getName()
 	 */
 	@Override
 	public String getName() {
@@ -104,67 +105,76 @@ public class TransientDisc implements Disc, IsWritable {
 
 	/*
 	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getArtists()
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Song#getKnownArtists()
 	 */
 	@Override
-	public Iterable<Artist> getArtists() {
-		if (this.artists == null) {
-			artists = new ArrayList<>();
-			for (Long artistId : this.artistsIds) {
+	public Iterable<Artist> getKnownArtists() {
+		if (this.knownArtists == null) {
+			knownArtists = new ArrayList<>();
+			for (Long artistId : this.knownArtistsIds) {
 				try {
-					artists.add(this.artistRepository.getById(artistId));
+					knownArtists.add(this.artistRepository.getById(artistId));
 				} catch (RepositoryException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		return this.artists;
+		return this.knownArtists;
+	}
+
+	@Override
+	public Composer getComposer() throws RepositoryException {
+		if (this.composer == null) {
+			// TODO create composer repo
+			composer = (Composer) this.artistRepository
+					.getById(this.composerId.get());
+		}
+		return this.composer;
+	}
+	
+	/*
+	 * 
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Song#getLyrics()
+	 */
+	@Override
+	public String getLyrics() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/*
 	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getMainArtist()
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Song#getFirstReleaseDate()
 	 */
 	@Override
-	public Artist getMainArtist() throws RepositoryException,
-			ExecutionException {
-		if (this.mainArtist == null) {
-			mainArtist = this.artistRepository.getById(this.mainArtistId.get());
-		}
-		return this.mainArtist;
-	}
-
-	/*
-	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getSongs()
-	 */
-	@Override
-	public Iterable<Song> getSongs() {
-		if (this.songs == null) {
-			songs = new ArrayList<>();
-			for (Long songId : this.songsIds) {
-				try {
-					songs.add(this.songRepository.getById(songId));
-				} catch (RepositoryException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return this.songs;
-	}
-
-	/*
-	 * @see br.study.ebah.miguel.cdsCatalog.elements.Disc#getReleaseDate()
-	 */
-	@Override
-	public Date getReleaseDate() {
-		if (this.releaseDate == null) {
+	public Date getFirstReleaseDate() {
+		if (this.firstReleaseDate == null) {
 			System.err.println("Unknown release date.");
 			return new Date();
 		} else {
-			return (Date) this.releaseDate.clone();
+			return (Date) this.firstReleaseDate.clone();
 		}
 	}
+
+	/*
+	 * 
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Song#getKnownDiscs()
+	 */
+	@Override
+	public Iterable<Disc> getKnownDiscs() throws RepositoryException {
+		if (this.knownDiscs == null) {
+			knownDiscs = new ArrayList<>();
+			for (Long discId : this.knownDiscsIds) {
+				try {
+					knownDiscs.add(this.discRepository.getById(discId));
+				} catch (RepositoryException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return this.knownDiscs;
+	}
+	
 
 	/*
 	 * 
@@ -176,33 +186,33 @@ public class TransientDisc implements Disc, IsWritable {
 	@SuppressWarnings(value = "unchecked")
 	public <T> Writable<T> asWritable(Class<T> type)
 			throws IllegalArgumentException {
-		if (type == Song.class) {
-			return (Writable<T>) new Writable<Song>() {
+		if (type == Disc.class) {
+			return (Writable<T>) new Writable<Disc>() {
 
 				@Override
-				public void add(Song t) throws RepositoryException {
+				public void add(Disc t) throws RepositoryException {
 					add(t.getId());
-					songRepository.save(t);
+					discRepository.save(t);
 				}
 
 				@Override
 				public void add(Long l) {
-					songsIds.add(l);
+					knownDiscsIds.add(l);
 				}
 
 			};
-		} else if (type == Artist.class) {
-			return (Writable<T>) new Writable<Artist>() {
+		} else if (type == Disc.class) {
+			return (Writable<T>) new Writable<Disc>() {
 
 				@Override
-				public void add(Artist t) throws RepositoryException {
+				public void add(Disc t) throws RepositoryException {
 					add(t.getId());
-					artistRepository.save(t);
+					discRepository.save(t);
 				}
 
 				@Override
 				public void add(Long l) {
-					artistsIds.add(l);
+					knownDiscsIds.add(l);
 				}
 
 			};
@@ -210,7 +220,7 @@ public class TransientDisc implements Disc, IsWritable {
 			throw new IllegalArgumentException();
 		}
 	}
-
+	
 	/*
 	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -240,5 +250,6 @@ public class TransientDisc implements Disc, IsWritable {
 		// TODO Override Object method
 		return super.hashCode();
 	}
+
 
 }

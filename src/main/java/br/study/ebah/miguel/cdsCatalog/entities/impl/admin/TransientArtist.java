@@ -32,8 +32,8 @@ public class TransientArtist implements Artist, IsWritable {
 	private Optional<Long> id = Optional.absent();
 	private final String name;
 	protected final List<Long> knownSongsIds;
-	protected final List<Long> knownDiscsIds;
-	protected final List<Long> knownMainDiscsIds;
+	private final List<Long> knownDiscsIds;
+	private final List<Long> knownMainDiscsIds;
 	private final Date birthday;
 
 	private final Repository<Song> songRepository;
@@ -46,16 +46,16 @@ public class TransientArtist implements Artist, IsWritable {
 	/*
 	 * 
 	 */
-	public TransientArtist(@Nonnull String name, RepositoryType store)
+	public TransientArtist(@Nonnull String name, RepositoryType repoType)
 			throws ExecutionException {
-		this(name, null, store);
+		this(name, null, repoType);
 	}
 
 	/*
 	 * 
 	 */
 	public TransientArtist(@Nonnull String name, @Nullable Date birthday,
-			RepositoryType store) throws ExecutionException {
+			RepositoryType repoType) throws ExecutionException {
 		this.name = name;
 
 		this.knownSongsIds = Collections
@@ -66,9 +66,9 @@ public class TransientArtist implements Artist, IsWritable {
 				.synchronizedList(new ArrayList<Long>());
 
 		this.discRepository = RepositoryFactory
-				.getRepository(Disc.class, store);
+				.getRepository(Disc.class, repoType);
 		this.songRepository = RepositoryFactory
-				.getRepository(Song.class, store);
+				.getRepository(Song.class, repoType);
 
 		this.birthday = birthday;
 
@@ -78,6 +78,7 @@ public class TransientArtist implements Artist, IsWritable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
 	 */
+	@Override
 	public Long getId() {
 		return id.or(-1L);
 	}
@@ -97,22 +98,37 @@ public class TransientArtist implements Artist, IsWritable {
 	 * br.study.ebah.miguel.cdsCatalog.actions.IsWritable#asAddable(java.lang
 	 * .Class)
 	 */
+	@Override
 	@SuppressWarnings(value = "unchecked")
 	public <T> Writable<T> asWritable(Class<T> type)
 			throws IllegalArgumentException {
 		if (type == Song.class) {
 			return (Writable<T>) new Writable<Song>() {
 
-				public void add(Long t) {
-					knownSongsIds.add(t);
+				@Override
+				public void add(Song t) throws RepositoryException {
+					add(t.getId());
+					songRepository.save(t);
+				}
+
+				@Override
+				public void add(Long l) {
+					knownSongsIds.add(l);
 				}
 
 			};
 		} else if (type == Disc.class) {
 			return (Writable<T>) new Writable<Disc>() {
 
-				public void add(Long t) {
-					knownDiscsIds.add(t);
+				@Override
+				public void add(Disc t) throws RepositoryException {
+					add(t.getId());
+					discRepository.save(t);
+				}
+
+				@Override
+				public void add(Long l) {
+					knownDiscsIds.add(l);
 				}
 
 			};
@@ -125,6 +141,7 @@ public class TransientArtist implements Artist, IsWritable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
 	 */
+	@Override
 	public boolean isTransient() {
 		return true;
 	}
@@ -133,6 +150,7 @@ public class TransientArtist implements Artist, IsWritable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Artist#getName()
 	 */
+	@Override
 	public final String getName() {
 		return this.name;
 	}
@@ -141,6 +159,7 @@ public class TransientArtist implements Artist, IsWritable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Artist#getKnownSongs()
 	 */
+	@Override
 	public Iterable<Song> getKnownSongs() {
 		if (this.knownSongs == null) {
 			knownSongs = new ArrayList<>();
@@ -159,6 +178,7 @@ public class TransientArtist implements Artist, IsWritable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Artist#getKnownDiscs()
 	 */
+	@Override
 	public Iterable<Disc> getKnownDiscs() {
 		if (this.knownDiscs == null) {
 			knownDiscs = new ArrayList<>();
@@ -177,6 +197,7 @@ public class TransientArtist implements Artist, IsWritable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Artist#getKnownMainDiscs()
 	 */
+	@Override
 	public Iterable<Disc> getKnownMainDiscs() {
 		if (this.knownMainDiscs == null) {
 			knownMainDiscs = new ArrayList<>();
@@ -207,8 +228,14 @@ public class TransientArtist implements Artist, IsWritable {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Artist#getBirthday()
 	 */
+	@Override
 	public Date getBirthday() {
-		return (Date) this.birthday.clone();
+		if (this.birthday == null) {
+			System.err.println("Unknown release date.");
+			return new Date();
+		} else {
+			return (Date) this.birthday.clone();
+		}
 	}
 
 	/*
