@@ -21,8 +21,9 @@ public class InMemoryRepository<T extends Entity> implements
 
 	@Override
 	public T getById(@Nonnull final Long id) throws RepositoryException {
-		if (map.containsKey(id)) {
-			return map.get(id);
+		T gotIt = map.get(id);
+		if (gotIt != null) {
+			return gotIt;
 		} else {
 			throw new RepositoryException(
 					"repository does not contain this entity");
@@ -32,14 +33,14 @@ public class InMemoryRepository<T extends Entity> implements
 	@Override
 	public T save(@Nonnull final T entity) throws RepositoryException {
 		try {
-			T persistEntentity;
+			T persistentEntity;
 			if (entity.isTransient()) {
-				persistEntentity = (new Persistence<T>(entity)).entity();
+				persistentEntity = (new Persistence<T>(entity)).entity();
 			} else {
-				persistEntentity = entity;
+				persistentEntity = entity;
 			}
-			map.put(persistEntentity.getId(), entity);
-			return persistEntentity;
+			map.put(persistentEntity.getId(), entity);
+			return persistentEntity;
 		} catch (Exception e) {
 			throw new RepositoryException(e);
 		}
