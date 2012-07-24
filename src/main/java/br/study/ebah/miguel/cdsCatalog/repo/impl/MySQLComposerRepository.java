@@ -2,28 +2,20 @@ package br.study.ebah.miguel.cdsCatalog.repo.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
 
-import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Composer;
-import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentComposer;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
 import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientComposer;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 import br.study.ebah.miguel.cdsCatalog.sql.MySQLConnectionFactory;
-import br.study.ebah.miguel.cdsCatalog.sql.SQLDBNoDataException;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -34,13 +26,7 @@ public class MySQLComposerRepository implements Repository<Composer> {
 	private static final Cache<Long, Composer> cache;
 
 	private static final Connection con;
-	private static final PreparedStatement idStmt;
-	private static final PreparedStatement mainDiscStmt;
-	private static final PreparedStatement workingOnDiscsStmt;
-	private static final PreparedStatement insertArtistStmt;
 	private static final PreparedStatement insertComposerStmt;
-	private static final PreparedStatement updateArtistStmt;
-	private static final PreparedStatement deleteArtistStmt;
 	private static final MySQLConnectionFactory connFact;
 
 	static {
@@ -54,23 +40,9 @@ public class MySQLComposerRepository implements Repository<Composer> {
 					throw new RuntimeException(e);
 				}
 				con = connFact.getConnection();
-				idStmt = con
-						.prepareStatement("SELECT * FROM artist WHERE id_artist=?");
-				mainDiscStmt = con.prepareStatement("SELECT * FROM disc"
-						+ " WHERE id_mainArtist=?");
-				workingOnDiscsStmt = con
-						.prepareStatement("SELECT * FROM `disc_artist-workingOn`"
-								+ " WHERE id_artist=?");
-				insertArtistStmt = con.prepareStatement(
-						"INSERT INTO artist (name,birthday) VALUES (?,?);",
-						Statement.RETURN_GENERATED_KEYS);
 				insertComposerStmt = con
-						.prepareStatement("INSERT INTO composer id_composer VALUE ?;");
-				updateArtistStmt = con
-						.prepareStatement("UPDATE artist SET name=?, birthday=?"
-								+ " WHERE id_artist=?;");
-				deleteArtistStmt = con.prepareStatement("DELETE FROM artist"
-						+ " WHERE id_artist=?;");
+						.prepareStatement("INSERT INTO composer id_composer"
+								+ " VALUE ?;");
 			} catch (SQLException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -89,11 +61,11 @@ public class MySQLComposerRepository implements Repository<Composer> {
 					Preconditions.checkNotNull(id, "id cannot be null");
 					Preconditions.checkState(!(con.isClosed()),
 							"cannot execute query if connection is closed");
-					Composer transientArtist = pullComposer(id);
-					Composer persistentArtist = new PersistentComposer(
-							transientArtist);
-					cache.put(id, persistentArtist);
-					return persistentArtist;
+					Composer transientComposer = pullComposer(id);
+					Composer persistentComposer = new PersistentComposer(
+							transientComposer);
+					cache.put(id, persistentComposer);
+					return persistentComposer;
 				}
 			});
 		} catch (ExecutionException e) {
@@ -104,18 +76,17 @@ public class MySQLComposerRepository implements Repository<Composer> {
 	@Override
 	public Composer save(@Nonnull final Composer composer)
 			throws RepositoryException {
-
 		Optional<Long> id = Optional.absent();
 		try {
-			Preconditions
-					.checkState(!(con.isClosed() || con.isReadOnly()),
-							"cannot execute query if connection is closed or read-only");
+			Preconditions.checkState(!(con.isClosed() || con.isReadOnly()),
+					"cannot execute query if connection is closed or"
+							+ " read-only");
 			if (composer.isTransient()) {
-				id = Optional.of(insertArtist(composer));
+				id = Optional.of(MySQLArtistRepository.insertArtist(composer));
 				insertComposerStmt.setLong(1, id.get());
 				insertComposerStmt.executeUpdate();
 			} else {
-				updateArtist(composer);
+				MySQLArtistRepository.updateArtist(composer);
 				cache.invalidate(composer.getId());
 			}
 		} catch (SQLException e) {
@@ -129,11 +100,11 @@ public class MySQLComposerRepository implements Repository<Composer> {
 	public void delete(@Nonnull final Composer artist)
 			throws RepositoryException {
 		try {
-			Preconditions
-					.checkState(!(con.isClosed() || con.isReadOnly()),
-							"cannot execute query if connection is closed or read-only");
+			Preconditions.checkState(!(con.isClosed() || con.isReadOnly()),
+					"cannot execute query if connection is closed or"
+							+ " read-only");
 
-			deleteArtist(artist);
+			MySQLArtistRepository.deleteArtist(artist);
 			cache.invalidate(artist.getId());
 		} catch (SQLException e) {
 			throw new RepositoryException(e);
@@ -142,105 +113,12 @@ public class MySQLComposerRepository implements Repository<Composer> {
 
 	private final Composer pullComposer(@Nonnull final Long id)
 			throws SQLException, ExecutionException {
-		Artist tempArtist = pullArtist(id);
+		Artist tempArtist = MySQLArtistRepository.pullArtist(id);
 		Composer composer = new TransientComposer(tempArtist.getName(),
 				tempArtist.getBirthday(), RepositoryType.MySQL);
-		// TODO import composed songs and create constructor Composer(Artist a)
+		// TODO import composed songs and create constructor Composer(Artist
+		// tempArtist)
 		return composer;
-	}
-
-	private final Artist pullArtist(@Nonnull final Long id)
-			throws SQLException, ExecutionException {
-		Preconditions
-				.checkState(
-						!(idStmt.isClosed() || mainDiscStmt.isClosed() || workingOnDiscsStmt
-								.isClosed()),
-						"cannot execute query if statement is closed");
-
-		idStmt.setLong(1, id.longValue());
-		TransientArtist artist;
-		try (ResultSet rs = idStmt.executeQuery()) {
-			if (rs.first()) {
-				java.sql.Date birthdaySQL = rs.getDate("birthday");
-				if (birthdaySQL == null) {
-					artist = new TransientArtist(rs.getString("name"),
-							RepositoryType.MySQL);
-				} else {
-					artist = new TransientArtist(rs.getString("name"),
-							new Date(birthdaySQL.getTime()),
-							RepositoryType.MySQL);
-				}
-			} else {
-				throw new SQLDBNoDataException("no data on artist table");
-			}
-		}
-		artist.setId(id);
-
-		Writable<Disc> discWritableArtist = artist.asWritable(Disc.class);
-
-		workingOnDiscsStmt.setLong(1, id.longValue());
-		try (ResultSet rs = workingOnDiscsStmt.executeQuery()) {
-			while (rs.next()) {
-				discWritableArtist.add(rs.getLong("id_disc"));
-			}
-		}
-
-		mainDiscStmt.setLong(1, id.longValue());
-		try (ResultSet rs = mainDiscStmt.executeQuery()) {
-			while (rs.next()) {
-				artist.setMain(rs.getLong("id_disc"));
-			}
-		}
-
-		artist.setId(id);
-
-		return artist;
-	}
-
-	private final long insertArtist(@Nonnull Artist artist) throws SQLException {
-		Preconditions.checkState(!(insertArtistStmt.isClosed()),
-				"cannot execute query if statement is closed");
-
-		insertArtistStmt.setString(1, artist.getName());
-		insertArtistStmt.setDate(2, new java.sql.Date(artist.getBirthday()
-				.getTime()));
-		int rows = insertArtistStmt.executeUpdate();
-		try (ResultSet rs = insertArtistStmt.getGeneratedKeys()) {
-			ResultSetMetaData metaData = rs.getMetaData();
-			if (rows == 1 && metaData.getColumnCount() == 1) {
-				return rs.getLong(metaData.getColumnName(1));
-			} else {
-				throw new SQLException("no rows affected");
-			}
-		}
-
-	}
-
-	private final void updateArtist(@Nonnull Artist artist) throws SQLException {
-		Preconditions.checkState(!(updateArtistStmt.isClosed()),
-				"cannot execute query if statement is closed");
-
-		updateArtistStmt.setString(1, artist.getName());
-		updateArtistStmt.setDate(2, new java.sql.Date(artist.getBirthday()
-				.getTime()));
-		updateArtistStmt.setLong(3, artist.getId());
-		int rows = updateArtistStmt.executeUpdate();
-		if (rows != 1) {
-			throw new SQLException("no rows affected");
-		}
-
-	}
-
-	private final void deleteArtist(@Nonnull Artist artist) throws SQLException {
-		Preconditions.checkState(!(deleteArtistStmt.isClosed()),
-				"cannot execute query if statement is closed");
-
-		deleteArtistStmt.setLong(1, artist.getId());
-		int rows = deleteArtistStmt.executeUpdate();
-		if (rows != 1) {
-			throw new SQLException("no rows affected");
-		}
-
 	}
 
 	/*
@@ -249,9 +127,7 @@ public class MySQLComposerRepository implements Repository<Composer> {
 	 */
 	@Override
 	public void close() throws Exception {
-		mainDiscStmt.close();
-		workingOnDiscsStmt.close();
-		idStmt.close();
+		insertComposerStmt.close();
 		con.close();
 	}
 

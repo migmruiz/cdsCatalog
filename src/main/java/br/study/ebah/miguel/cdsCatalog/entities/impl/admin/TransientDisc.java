@@ -30,7 +30,7 @@ public class TransientDisc implements Disc, IsWritable {
 	private final String name;
 	private final List<Long> songsIds;
 	private final List<Long> artistsIds;
-	private final Optional<Long> mainArtistId = Optional.absent();
+	private Optional<Long> mainArtistId = Optional.absent();
 	private final Date releaseDate;
 
 	private final Repository<Artist> artistRepository;
@@ -132,6 +132,15 @@ public class TransientDisc implements Disc, IsWritable {
 			mainArtist = this.artistRepository.getById(this.mainArtistId.get());
 		}
 		return this.mainArtist;
+	}
+
+	public void setMain(long artistId) {
+		if (artistsIds.contains(artistId)) {
+			this.mainArtistId = Optional.of(artistId);
+		} else {
+			throw new UnsupportedOperationException(
+					"artistId must be under artistsIds first");
+		}
 	}
 
 	/*

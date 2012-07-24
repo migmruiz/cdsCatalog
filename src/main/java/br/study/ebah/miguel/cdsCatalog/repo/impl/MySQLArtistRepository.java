@@ -104,7 +104,6 @@ public class MySQLArtistRepository implements Repository<Artist> {
 
 	@Override
 	public Artist save(@Nonnull final Artist artist) throws RepositoryException {
-
 		Optional<Long> id = Optional.absent();
 		try {
 			Preconditions
@@ -137,8 +136,8 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		}
 	}
 
-	private final Artist pullArtist(@Nonnull final Long id)
-			throws SQLException, ExecutionException {
+	final static Artist pullArtist(@Nonnull final Long id) throws SQLException,
+			ExecutionException {
 		Preconditions
 				.checkState(
 						!(idStmt.isClosed() || mainDiscStmt.isClosed() || workingOnDiscsStmt
@@ -162,7 +161,6 @@ public class MySQLArtistRepository implements Repository<Artist> {
 				throw new SQLDBNoDataException("no data on artist table");
 			}
 		}
-		artist.setId(id);
 
 		Writable<Disc> discWritableArtist = artist.asWritable(Disc.class);
 
@@ -185,7 +183,7 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		return artist;
 	}
 
-	private final long insertArtist(@Nonnull Artist artist) throws SQLException {
+	final static long insertArtist(@Nonnull Artist artist) throws SQLException {
 		Preconditions.checkState(!(insertArtistStmt.isClosed()),
 				"cannot execute query if statement is closed");
 
@@ -201,10 +199,10 @@ public class MySQLArtistRepository implements Repository<Artist> {
 				throw new SQLException("no rows affected");
 			}
 		}
-
+		// TODO update/insert into many-to-many tables
 	}
 
-	private final void updateArtist(@Nonnull Artist artist) throws SQLException {
+	final static void updateArtist(@Nonnull Artist artist) throws SQLException {
 		Preconditions.checkState(!(updateArtistStmt.isClosed()),
 				"cannot execute query if statement is closed");
 
@@ -216,10 +214,10 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		if (rows != 1) {
 			throw new SQLException("no rows affected");
 		}
-
+		// TODO update many-to-many tables
 	}
 
-	private final void deleteArtist(@Nonnull Artist artist) throws SQLException {
+	final static void deleteArtist(@Nonnull Artist artist) throws SQLException {
 		Preconditions.checkState(!(deleteArtistStmt.isClosed()),
 				"cannot execute query if statement is closed");
 
@@ -237,6 +235,9 @@ public class MySQLArtistRepository implements Repository<Artist> {
 	 */
 	@Override
 	public void close() throws Exception {
+		insertArtistStmt.close();
+		updateArtistStmt.close();
+		deleteArtistStmt.close();
 		mainDiscStmt.close();
 		workingOnDiscsStmt.close();
 		idStmt.close();

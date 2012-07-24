@@ -132,6 +132,12 @@ public class TransientSong implements Song, IsWritable {
 		return this.composer;
 	}
 	
+
+	public void setComposer(long long1) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	/*
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Song#getLyrics()
@@ -250,6 +256,7 @@ public class TransientSong implements Song, IsWritable {
 		// TODO Override Object method
 		return super.hashCode();
 	}
+
 
 
 }
