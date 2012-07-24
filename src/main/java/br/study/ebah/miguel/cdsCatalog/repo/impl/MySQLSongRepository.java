@@ -133,7 +133,7 @@ public class MySQLSongRepository implements Repository<Song> {
 	}
 
 	private final static Song pullSong(@Nonnull final Long id)
-			throws SQLException, ExecutionException {
+			throws SQLException, ExecutionException, SQLDBNoDataException {
 		Preconditions
 				.checkState(
 						!(idStmt.isClosed() || discContainsStmt.isClosed() || fromArtistStmt

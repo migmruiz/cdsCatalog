@@ -128,7 +128,7 @@ public class MySQLDiscRepository implements Repository<Disc> {
 	}
 
 	private final static Disc pullDisc(@Nonnull final Long id)
-			throws SQLException, ExecutionException {
+			throws SQLException, ExecutionException, SQLDBNoDataException {
 		Preconditions.checkState(
 				!(idStmt.isClosed() || workingOnDiscsStmt.isClosed()),
 				"cannot execute query if statement is closed");

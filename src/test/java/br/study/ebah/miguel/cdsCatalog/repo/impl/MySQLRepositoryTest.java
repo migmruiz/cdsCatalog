@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
@@ -14,7 +14,6 @@ import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
-import br.study.ebah.miguel.cdsCatalog.sql.SQLDBNoDataException;
 
 /**
  * @author miguel
@@ -22,14 +21,14 @@ import br.study.ebah.miguel.cdsCatalog.sql.SQLDBNoDataException;
  */
 public class MySQLRepositoryTest {
 
-	private Disc disc;
-	private Repository<Disc> discRepository;
+	private static Disc disc;
+	private static Repository<Disc> discRepository;
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeClass
+	public static void setUp() throws Exception {
 		discRepository = RepositoryFactory.getRepository(Disc.class,
 				RepositoryType.MySQL);
-		this.disc = discRepository.getById(1L);
+		disc = discRepository.getById(1L);
 	}
 
 	@Test
@@ -54,10 +53,12 @@ public class MySQLRepositoryTest {
 		boolean goOn = true;
 		try {
 			for (long i = 1L; goOn; i++) {
-				discs.add(discRepository.getById(i));
+				try {
+					discs.add(discRepository.getById(i));
+				} catch (RepositoryException e) {
+					goOn = false;
+				}
 			}
-		} catch (SQLDBNoDataException e) {
-			goOn = false;
 		} finally {
 			try {
 				for (Disc disc : discs) {
@@ -70,8 +71,8 @@ public class MySQLRepositoryTest {
 		}
 	}
 
-	@After
-	public void close() throws Exception {
+	@AfterClass
+	public static void close() throws Exception {
 		discRepository.close();
 	}
 

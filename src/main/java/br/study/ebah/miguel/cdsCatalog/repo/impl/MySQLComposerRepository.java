@@ -16,6 +16,7 @@ import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 import br.study.ebah.miguel.cdsCatalog.sql.MySQLConnectionFactory;
+import br.study.ebah.miguel.cdsCatalog.sql.SQLDBNoDataException;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -112,7 +113,7 @@ public class MySQLComposerRepository implements Repository<Composer> {
 	}
 
 	private final Composer pullComposer(@Nonnull final Long id)
-			throws SQLException, ExecutionException {
+			throws SQLException, ExecutionException, SQLDBNoDataException {
 		Artist tempArtist = MySQLArtistRepository.pullArtist(id);
 		Composer composer = new TransientComposer(tempArtist.getName(),
 				tempArtist.getBirthday(), RepositoryType.MySQL);
