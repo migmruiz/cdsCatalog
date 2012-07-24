@@ -1,7 +1,7 @@
 /**
  * 
  */
-package br.study.ebah.miguel.cdsCatalog.sql.access;
+package br.study.ebah.miguel.cdsCatalog.sql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
