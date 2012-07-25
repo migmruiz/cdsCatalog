@@ -1,0 +1,46 @@
+body {
+	font-family: 'Trebuchet MS', verdana, arial, sans-serif;
+	background-color: LightSlateGray;
+	margin: 0px;
+	font-size: 10pt;
+}
+
+h1 {
+	border-bottom: black 1px solid;
+}
+
+h2 {
+	border-bottom: gray 1px solid;
+}
+
+h3 {
+	border-bottom: silver 1px solid;
+}
+
+a:link,a:visited {
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+div#main {
+	margin-left: auto;
+	margin-right: auto;
+	width: 60em;
+	background-color: LavenderBlush;
+	border: LavenderBlush 2em solid;
+}
+
+div#images {
+	position: relative;
+	float: right;
+}
+
+div#contact {
+	width: 20em;
+	margin-left: auto;
+	margin-right: 0;
+}
