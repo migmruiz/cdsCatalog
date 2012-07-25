@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
+import javax.servlet.ServletException;
+
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
@@ -22,16 +24,17 @@ public class CdsDAO {
 	private List<Map<String, String>> authorLinks;
 	private Map<String, String> cdLink;
 
-	public CdsDAO() {
+	public CdsDAO() throws ServletException {
 		try {
 			discRepository = RepositoryFactory.getRepository(Disc.class,
 					RepositoryType.MySQL);
 		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
+			throw new ServletException(e);
 		}
 	}
 
-	public final Map<String, List<Map<String, String>>> getContainerWithArtists() {
+	public final Map<String, List<Map<String, String>>> getContainerWithArtists()
+			throws ServletException {
 		cdsContainer = new ConcurrentHashMap<>();
 
 		List<Disc> discs = Collections.synchronizedList(new ArrayList<Disc>());
@@ -62,7 +65,7 @@ public class CdsDAO {
 				}
 			} catch (NullPointerException | RepositoryException
 					| ExecutionException e) {
-				throw new RuntimeException(e);
+				throw new ServletException(e);
 			}
 		}
 		return cdsContainer;
