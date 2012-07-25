@@ -21,18 +21,17 @@ public class ControllerServlet extends HttpServlet {
 	private static final LocalDate creationDate = new LocalDate(2012, 7, 24);
 	private static final LocalDate lastModifiedDate = new LocalDate(2012, 7, 25);
 	private static final int expiresTimeInDays = 90;
-	private CdsDAO cdsDAO;
+	private static CdsDAO cdsDAO;
 
 	@Override
-	public synchronized void init(ServletConfig config) throws ServletException {
-		cdsDAO = new CdsDAO();
+	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
+		cdsDAO = CdsDAO.getInstance();
 	}
 
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
-		
 		response.setCharacterEncoding("UTF-8");
 		response.setDateHeader("Expires", lastModifiedDate.toDate().getTime()
 				+ expiresTimeInDays * 24 * 60 * 60 * 1000);
@@ -61,6 +60,7 @@ public class ControllerServlet extends HttpServlet {
 
 	@Override
 	public void destroy() {
+		cdsDAO.close();
 		super.destroy();
 	}
 }

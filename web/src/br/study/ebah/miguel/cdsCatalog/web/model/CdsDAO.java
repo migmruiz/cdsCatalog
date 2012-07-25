@@ -16,7 +16,7 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 
-public class CdsDAO {
+public class CdsDAO implements AutoCloseable {
 
 	private final Repository<Disc> discRepository;
 
@@ -24,13 +24,25 @@ public class CdsDAO {
 	private List<Map<String, String>> authorLinks;
 	private Map<String, String> cdLink;
 
-	public CdsDAO() throws ServletException {
-		try {
-			discRepository = RepositoryFactory.getRepository(Disc.class,
-					RepositoryType.MySQL);
-		} catch (ExecutionException e) {
-			throw new ServletException(e);
+	private static CdsDAO instance;
+
+	private CdsDAO() throws ExecutionException {
+
+		discRepository = RepositoryFactory.getRepository(Disc.class,
+				RepositoryType.MySQL);
+
+	}
+
+	public static synchronized CdsDAO getInstance() throws ServletException {
+		if (instance == null) {
+			try {
+				instance = new CdsDAO();
+			} catch (ExecutionException e) {
+				throw new ServletException(e);
+			}
+
 		}
+		return instance;
 	}
 
 	public final Map<String, List<Map<String, String>>> getContainerWithArtists()
@@ -70,6 +82,14 @@ public class CdsDAO {
 		}
 		return cdsContainer;
 
+	}
+
+	public void close() {
+		try {
+			discRepository.close();
+		} catch (Exception e) {
+		}
+		instance = null;
 	}
 
 }
