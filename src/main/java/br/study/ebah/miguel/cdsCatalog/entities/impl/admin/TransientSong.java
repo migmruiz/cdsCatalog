@@ -31,10 +31,11 @@ public class TransientSong implements Song, IsWritable {
 	private final String name;
 	private final List<Long> knownDiscsIds;
 	private final List<Long> knownArtistsIds;
-	private final Optional<Long> composerId = Optional.absent();
+	private Optional<Long> composerId = Optional.absent();
 	private final Date firstReleaseDate;
 
 	private final Repository<Artist> artistRepository;
+	private final Repository<Composer> composerRepository;
 	private final Repository<Disc> discRepository;
 
 	private List<Disc> knownDiscs;
@@ -62,6 +63,8 @@ public class TransientSong implements Song, IsWritable {
 				.synchronizedList(new ArrayList<Long>());
 
 		this.artistRepository = RepositoryFactory.getRepository(Artist.class,
+				repoType);
+		this.composerRepository = RepositoryFactory.getRepository(Composer.class,
 				repoType);
 		this.discRepository = RepositoryFactory.getRepository(Disc.class,
 				repoType);
@@ -125,16 +128,20 @@ public class TransientSong implements Song, IsWritable {
 	@Override
 	public Composer getComposer() throws RepositoryException {
 		if (this.composer == null) {
-			// TODO create composer repo
-			composer = (Composer) this.artistRepository
+			composer = this.composerRepository
 					.getById(this.composerId.get());
 		}
 		return this.composer;
 	}
 	
 
-	public void setComposer(long long1) {
-		// TODO Auto-generated method stub
+	public void setComposer(long composerId) {
+		if (knownArtistsIds.contains(composerId)) {
+			this.composerId = Optional.of(composerId);
+		} else {
+			throw new UnsupportedOperationException(
+					"composerId must be under knownArtistsIds first");
+		}
 		
 	}
 	
