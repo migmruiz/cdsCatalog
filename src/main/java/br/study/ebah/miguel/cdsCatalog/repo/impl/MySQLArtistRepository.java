@@ -137,7 +137,7 @@ public class MySQLArtistRepository implements Repository<Artist> {
 	}
 
 	final static Artist pullArtist(@Nonnull final Long id) throws SQLException,
-			ExecutionException {
+			ExecutionException, SQLDBNoDataException {
 		Preconditions
 				.checkState(
 						!(idStmt.isClosed() || mainDiscStmt.isClosed() || workingOnDiscsStmt

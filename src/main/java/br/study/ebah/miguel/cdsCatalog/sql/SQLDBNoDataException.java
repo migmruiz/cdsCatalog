@@ -9,7 +9,7 @@ package br.study.ebah.miguel.cdsCatalog.sql;
  * @author miguel
  * 
  */
-public class SQLDBNoDataException extends RuntimeException {
+public class SQLDBNoDataException extends Exception {
 
 	/**
 	 * 
