@@ -18,78 +18,83 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 
 public class CdsDAO implements AutoCloseable {
 
-	private final Repository<Disc> discRepository;
+    private final Repository<Disc> discRepository;
 
-	private Map<String, List<Map<String, String>>> cdsContainer;
-	private List<Map<String, String>> authorLinks;
-	private Map<String, String> cdLink;
+    private Map<String, List<Map<String, String>>> cdsContainer;
+    private List<Map<String, String>> authorLinks;
+    private Map<String, String> cdLink;
 
-	private static CdsDAO instance;
+    private static CdsDAO instance;
 
-	private CdsDAO() throws ExecutionException {
+    private static final Object syncObj_lock = new Object();
 
-		discRepository = RepositoryFactory.getRepository(Disc.class,
-				RepositoryType.MySQL);
+    private CdsDAO() throws ExecutionException {
 
-	}
+        discRepository = RepositoryFactory.getRepository(Disc.class,
+                RepositoryType.MySQL);
 
-	public static synchronized CdsDAO getInstance() throws ServletException {
-		if (instance == null) {
-			try {
-				instance = new CdsDAO();
-			} catch (ExecutionException e) {
-				throw new ServletException(e);
-			}
+    }
 
-		}
-		return instance;
-	}
+    public static synchronized CdsDAO getInstance() throws ServletException {
+        synchronized (syncObj_lock) {
+            if (instance == null) {
+                try {
+                    instance = new CdsDAO();
+                } catch (ExecutionException e) {
+                    throw new ServletException(e);
+                }
+            }
+            return instance;
+        }
+    }
 
-	public final Map<String, List<Map<String, String>>> getContainerWithArtists()
-			throws ServletException {
-		cdsContainer = new ConcurrentHashMap<>();
+    public final Map<String, List<Map<String, String>>> getContainerWithArtists()
+            throws ServletException {
+        cdsContainer = new ConcurrentHashMap<>();
 
-		List<Disc> discs = Collections.synchronizedList(new ArrayList<Disc>());
-		boolean goOn = true;
-		try {
-			for (long i = 1L; goOn; i++) {
-				try {
-					discs.add(discRepository.getById(i));
-				} catch (RepositoryException e) {
-					goOn = false;
-				}
-			}
-		} finally {
-			try {
-				for (Disc disc : discs) {
-					authorLinks = Collections
-							.synchronizedList(new ArrayList<Map<String, String>>());
-					cdsContainer.put(disc.getName(), authorLinks);
-					for (Artist artist : disc.getArtists()) {
-						cdLink = new ConcurrentHashMap<>();
-						cdLink.put("artist", artist.getName());
-						if (artist.equals(disc.getMainArtist())) {
-							cdLink.put("mainArtist", disc.getMainArtist()
-									.getName());
-						}
-						authorLinks.add(cdLink);
-					}
-				}
-			} catch (NullPointerException | RepositoryException
-					| ExecutionException e) {
-				throw new ServletException(e);
-			}
-		}
-		return cdsContainer;
+        List<Disc> discs = Collections.synchronizedList(new ArrayList<Disc>());
+        boolean goOn = true;
+        try {
+            for (long i = 1L; goOn; i++) {
+                try {
+                    discs.add(discRepository.getById(i));
+                } catch (RepositoryException e) {
+                    goOn = false;
+                }
+            }
+        } finally {
+            try {
+                for (Disc disc : discs) {
+                    authorLinks = Collections
+                            .synchronizedList(new ArrayList<Map<String, String>>());
+                    cdsContainer.put(disc.getName(), authorLinks);
+                    for (Artist artist : disc.getArtists()) {
+                        cdLink = new ConcurrentHashMap<>();
+                        cdLink.put("artist", artist.getName());
+                        if (artist.equals(disc.getMainArtist())) {
+                            cdLink.put("mainArtist", disc.getMainArtist()
+                                    .getName());
+                        }
+                        authorLinks.add(cdLink);
+                    }
+                }
+            } catch (NullPointerException | RepositoryException
+                    | ExecutionException e) {
+                throw new ServletException(e);
+            }
+        }
+        return cdsContainer;
 
-	}
+    }
 
-	public void close() {
-		try {
-			discRepository.close();
-		} catch (Exception e) {
-		}
-		instance = null;
-	}
+    public void close() {
+        synchronized (syncObj_lock) {
+            instance = null;
+            try {
+                discRepository.close();
+            } catch (Exception e) {
+            }
+        }
+    }
 
 }
