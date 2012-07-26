@@ -1,4 +1,4 @@
-package br.study.ebah.miguel.cdsCatalog.repo.impl;
+package br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

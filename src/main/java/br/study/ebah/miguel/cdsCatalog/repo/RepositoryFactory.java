@@ -9,10 +9,10 @@ import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Entity;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.InMemoryRepository;
-import br.study.ebah.miguel.cdsCatalog.repo.impl.MySQLArtistRepository;
-import br.study.ebah.miguel.cdsCatalog.repo.impl.MySQLComposerRepository;
-import br.study.ebah.miguel.cdsCatalog.repo.impl.MySQLDiscRepository;
-import br.study.ebah.miguel.cdsCatalog.repo.impl.MySQLSongRepository;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc.MySQLArtistRepository;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc.MySQLComposerRepository;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc.MySQLDiscRepository;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc.MySQLSongRepository;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
