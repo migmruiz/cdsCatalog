@@ -4,7 +4,7 @@
 
 	<groupId>br.study.ebah.miguel</groupId>
 	<artifactId>cdsCatalog</artifactId>
-	<version>0.1</version>
+	<version>0.2</version>
 	<packaging>jar</packaging>
 
 	<name>cdsCatalog</name>
@@ -29,6 +29,16 @@
 		<groupId>com.google.guava</groupId>
 		<artifactId>guava</artifactId>
 		<version>12.0</version>
+	</dependency>
+	<dependency>
+		<groupId>joda-time</groupId>
+		<artifactId>joda-time</artifactId>
+		<version>2.1</version>
+	</dependency>
+	<dependency>
+		<groupId>javax.servlet</groupId>
+		<artifactId>jstl</artifactId>
+		<version>1.2</version>
 	</dependency>
 	</dependencies>
 </project>
