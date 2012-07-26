@@ -7,16 +7,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
-import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
-import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 
-public class CdsDAO implements AutoCloseable {
+public class CdsDAO {
 
 	private final Repository<Disc> discRepository;
 
@@ -24,25 +23,10 @@ public class CdsDAO implements AutoCloseable {
 	private List<Map<String, String>> authorLinks;
 	private Map<String, String> cdLink;
 
-	private static CdsDAO instance;
+	public CdsDAO(@Nonnull final Repository<Disc> discRepository) {
 
-	private CdsDAO() throws ExecutionException {
+		this.discRepository = discRepository;
 
-		discRepository = RepositoryFactory.getRepository(Disc.class,
-				RepositoryType.MySQL);
-
-	}
-
-	public static synchronized CdsDAO getInstance() throws ServletException {
-		if (instance == null) {
-			try {
-				instance = new CdsDAO();
-			} catch (ExecutionException e) {
-				throw new ServletException(e);
-			}
-
-		}
-		return instance;
 	}
 
 	public final Map<String, List<Map<String, String>>> getContainerWithArtists()
@@ -82,14 +66,6 @@ public class CdsDAO implements AutoCloseable {
 		}
 		return cdsContainer;
 
-	}
-
-	public void close() {
-		try {
-			discRepository.close();
-		} catch (Exception e) {
-		}
-		instance = null;
 	}
 
 }
