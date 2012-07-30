@@ -21,7 +21,7 @@ public class PersistentComposer extends PersistentArtist implements Composer {
 	}
 
 	@Override
-	public Iterable<Song> getKnownComposedSongs() {
+	public Iterable<? extends Song> getKnownComposedSongs() {
 		return this.composer.getKnownComposedSongs();
 	}
 

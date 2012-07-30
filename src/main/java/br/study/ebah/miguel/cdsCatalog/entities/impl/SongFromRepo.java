@@ -62,12 +62,12 @@ class SongFromRepo implements Song {
 	}
 
 	@Override
-	public Iterable<Artist> getKnownArtists() throws RepositoryException {
+	public Iterable<? extends Artist> getKnownArtists() throws RepositoryException {
 		return this.song.getKnownArtists();
 	}
 
 	@Override
-	public Iterable<Disc> getKnownDiscs() throws RepositoryException {
+	public Iterable<? extends Disc> getKnownDiscs() throws RepositoryException {
 		return this.song.getKnownDiscs();
 	}
 

@@ -52,7 +52,7 @@ public class PersistentDisc implements Disc {
 	}
 
 	@Override
-	public Iterable<Artist> getArtists() throws RepositoryException {
+	public Iterable<? extends Artist> getArtists() throws RepositoryException {
 		return this.disc.getArtists();
 	}
 
@@ -63,7 +63,7 @@ public class PersistentDisc implements Disc {
 	}
 
 	@Override
-	public Iterable<Song> getSongs() throws RepositoryException {
+	public Iterable<? extends Song> getSongs() throws RepositoryException {
 		return this.disc.getSongs();
 	}
 

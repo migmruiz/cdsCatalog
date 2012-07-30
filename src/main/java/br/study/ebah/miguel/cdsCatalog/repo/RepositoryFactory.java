@@ -8,6 +8,7 @@ import br.study.ebah.miguel.cdsCatalog.entities.Composer;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Entity;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.HibernateRepository;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.InMemoryRepository;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc.MySQLArtistRepository;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc.MySQLComposerRepository;
@@ -53,6 +54,9 @@ public final class RepositoryFactory {
 										"Repository is not set for this entity"
 												+ " of MySQL RepositoryType");
 							}
+						case Hibernate:
+							// TODO replace Entities.class to JPAEntities.class
+							return new HibernateRepository<T>(t);
 
 						default:
 							throw new AssertionError(

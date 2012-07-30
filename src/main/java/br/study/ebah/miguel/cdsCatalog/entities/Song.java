@@ -35,11 +35,11 @@ public interface Song extends Entity {
 	/*
 	 * 
 	 */
-	public Iterable<Artist> getKnownArtists() throws RepositoryException;
+	public Iterable<? extends Artist> getKnownArtists() throws RepositoryException;
 
 	/*
 	 * 
 	 */
-	public Iterable<Disc> getKnownDiscs() throws RepositoryException;
+	public Iterable<? extends Disc> getKnownDiscs() throws RepositoryException;
 
 }

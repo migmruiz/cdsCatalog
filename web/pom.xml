@@ -5,7 +5,7 @@
 	<groupId>br.study.ebah.miguel</groupId>
 	<artifactId>cdsCatalog-web</artifactId>
 	<version>0.2</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>cdsCatalog</name>
 	<url>http://maven.apache.org</url>

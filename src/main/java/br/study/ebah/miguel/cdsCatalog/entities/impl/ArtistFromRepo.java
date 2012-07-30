@@ -35,7 +35,8 @@ class ArtistFromRepo implements Artist {
 		return this.artist.getName();
 	}
 
-	@Override @Nonnull
+	@Override
+	@Nonnull
 	public Long getId() {
 		return this.id;
 	}
@@ -46,18 +47,19 @@ class ArtistFromRepo implements Artist {
 	}
 
 	@Override
-	public Iterable<Song> getKnownSongs() throws RepositoryException {
+	public Iterable<? extends Song> getKnownSongs() throws RepositoryException {
 		return this.artist.getKnownSongs();
 	}
 
 	@Override
-	public Iterable<Disc> getKnownDiscs() throws RepositoryException,
+	public Iterable<? extends Disc> getKnownDiscs() throws RepositoryException,
 			ExecutionException {
 		return this.artist.getKnownDiscs();
 	}
 
 	@Override
-	public Iterable<Disc> getKnownMainDiscs() throws RepositoryException {
+	public Iterable<? extends Disc> getKnownMainDiscs()
+			throws RepositoryException {
 		return this.artist.getKnownMainDiscs();
 	}
 

@@ -86,7 +86,7 @@ public class PersistentSong implements Song {
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Song#getKnownArtists()
 	 */
 	@Override
-	public Iterable<Artist> getKnownArtists() throws RepositoryException {
+	public Iterable<? extends Artist> getKnownArtists() throws RepositoryException {
 		return this.song.getKnownArtists();
 	}
 
@@ -95,7 +95,7 @@ public class PersistentSong implements Song {
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Song#getKnownDiscs()
 	 */
 	@Override
-	public Iterable<Disc> getKnownDiscs() throws RepositoryException {
+	public Iterable<? extends Disc> getKnownDiscs() throws RepositoryException {
 		return this.song.getKnownDiscs();
 	}
 

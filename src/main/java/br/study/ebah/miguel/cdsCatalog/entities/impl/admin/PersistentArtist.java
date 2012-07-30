@@ -55,7 +55,7 @@ public class PersistentArtist implements Artist {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getKnownDiscs()
 	 */
-	public Iterable<Disc> getKnownDiscs() throws RepositoryException,
+	public Iterable<? extends Disc> getKnownDiscs() throws RepositoryException,
 			ExecutionException {
 		return this.artist.getKnownDiscs();
 	}
@@ -64,7 +64,8 @@ public class PersistentArtist implements Artist {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getKnownMainDiscs()
 	 */
-	public Iterable<Disc> getKnownMainDiscs() throws RepositoryException {
+	public Iterable<? extends Disc> getKnownMainDiscs()
+			throws RepositoryException {
 		return this.artist.getKnownMainDiscs();
 	}
 
@@ -72,7 +73,7 @@ public class PersistentArtist implements Artist {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.elements.Artist#getKnownSongs()
 	 */
-	public Iterable<Song> getKnownSongs() throws RepositoryException {
+	public Iterable<? extends Song> getKnownSongs() throws RepositoryException {
 		return this.artist.getKnownSongs();
 	}
 

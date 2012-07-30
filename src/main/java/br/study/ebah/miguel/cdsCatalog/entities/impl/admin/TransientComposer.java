@@ -54,15 +54,6 @@ public class TransientComposer extends TransientArtist implements Composer {
 
 	/*
 	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
-	 */
-	@Override
-	public boolean isTransient() {
-		return true;
-	}
-
-	/*
-	 * 
 	 * @see
 	 * br.study.ebah.miguel.cdsCatalog.entities.Composer#getKnownComposedSongs()
 	 */

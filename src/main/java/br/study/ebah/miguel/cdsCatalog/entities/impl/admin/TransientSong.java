@@ -124,7 +124,11 @@ public class TransientSong implements Song, IsWritable {
 		}
 		return this.knownArtists;
 	}
-
+	
+	/*
+	 * 
+	 * @see br.study.ebah.miguel.cdsCatalog.entities.Song#getComposer()
+	 */
 	@Override
 	public Composer getComposer() throws RepositoryException {
 		if (this.composer == null) {
@@ -133,7 +137,6 @@ public class TransientSong implements Song, IsWritable {
 		}
 		return this.composer;
 	}
-	
 
 	public void setComposer(long composerId) {
 		if (knownArtistsIds.contains(composerId)) {

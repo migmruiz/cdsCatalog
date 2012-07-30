@@ -24,7 +24,7 @@ public class ControllerServlet extends HttpServlet {
 	 * time-stamps
 	 */
 	private static final LocalDate creationDate = new LocalDate(2012, 7, 24);
-	private static final LocalDate lastModifiedDate = new LocalDate(2012, 7, 25);
+	private static final LocalDate lastModifiedDate = new LocalDate(2012, 7, 29);
 	private static final int expiresTimeInDays = 90;
 	private Repository<Disc> discRepository;
 
@@ -33,7 +33,7 @@ public class ControllerServlet extends HttpServlet {
 		super.init(config);
 		try {
 			discRepository = RepositoryFactory.getRepository(Disc.class,
-					RepositoryType.MySQL);
+					RepositoryType.Hibernate);
 		} catch (ExecutionException e) {
 			throw new ServletException(e);
 		}

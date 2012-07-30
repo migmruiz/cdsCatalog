@@ -44,7 +44,7 @@ class DiscFromRepo implements Disc {
 	}
 
 	@Override
-	public Iterable<Artist> getArtists() throws RepositoryException {
+	public Iterable<? extends Artist> getArtists() throws RepositoryException {
 		return this.disc.getArtists();
 	}
 
@@ -55,7 +55,7 @@ class DiscFromRepo implements Disc {
 	}
 
 	@Override
-	public Iterable<Song> getSongs() throws RepositoryException {
+	public Iterable<? extends Song> getSongs() throws RepositoryException {
 		return this.disc.getSongs();
 	}
 

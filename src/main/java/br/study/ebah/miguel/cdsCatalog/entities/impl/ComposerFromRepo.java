@@ -48,18 +48,18 @@ class ComposerFromRepo implements Composer {
 	}
 
 	@Override
-	public Iterable<Song> getKnownSongs() throws RepositoryException {
+	public Iterable<? extends Song> getKnownSongs() throws RepositoryException {
 		return this.composer.getKnownSongs();
 	}
 
 	@Override
-	public Iterable<Disc> getKnownDiscs() throws RepositoryException,
+	public Iterable<? extends Disc> getKnownDiscs() throws RepositoryException,
 			ExecutionException {
 		return this.composer.getKnownDiscs();
 	}
 
 	@Override
-	public Iterable<Disc> getKnownMainDiscs() throws RepositoryException {
+	public Iterable<? extends Disc> getKnownMainDiscs() throws RepositoryException {
 		return this.composer.getKnownMainDiscs();
 	}
 
@@ -69,7 +69,7 @@ class ComposerFromRepo implements Composer {
 	}
 
 	@Override
-	public Iterable<Song> getKnownComposedSongs() {
+	public Iterable<? extends Song> getKnownComposedSongs() {
 		return this.composer.getKnownComposedSongs();
 	}
 }

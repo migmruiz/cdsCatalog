@@ -21,7 +21,7 @@ public interface Disc extends Entity {
 	/*
 	 * 
 	 */
-	public Iterable<Artist> getArtists() throws RepositoryException;
+	public Iterable<? extends Artist> getArtists() throws RepositoryException;
 
 	/*
 	 * 
@@ -31,7 +31,7 @@ public interface Disc extends Entity {
 	/*
 	 * 
 	 */
-	public Iterable<Song> getSongs() throws RepositoryException;
+	public Iterable<? extends Song> getSongs() throws RepositoryException;
 
 	/*
 	 * 

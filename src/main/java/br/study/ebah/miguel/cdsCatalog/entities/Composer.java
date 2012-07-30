@@ -11,6 +11,6 @@ public interface Composer extends Artist {
 	/*
 	 * 
 	 */
-	public Iterable<Song> getKnownComposedSongs();
+	public Iterable<? extends Song> getKnownComposedSongs();
 
 }
