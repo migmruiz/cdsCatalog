@@ -20,6 +20,8 @@ import br.study.ebah.miguel.cdsCatalog.entities.Song;
  * 
  */
 @Entity
+// @Cacheable
+// @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class JPAArtist implements Artist {
 
 	@GeneratedValue
@@ -29,11 +31,11 @@ public class JPAArtist implements Artist {
 	private String name;
 	private Date birthday;
 
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, targetEntity = JPASong.class, fetch = FetchType.LAZY)
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, targetEntity = JPASong.class, fetch = FetchType.EAGER)
 	private Set<? extends Song> knownSongs;
-	@ManyToMany(mappedBy = "artists", targetEntity = JPADisc.class, fetch = FetchType.LAZY)
+	@ManyToMany(mappedBy = "artists", targetEntity = JPADisc.class, fetch = FetchType.EAGER)
 	private Set<? extends Disc> knownDiscs;
-	@OneToMany(mappedBy = "mainArtist", targetEntity = JPADisc.class, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "mainArtist", targetEntity = JPADisc.class, fetch = FetchType.EAGER)
 	private Set<? extends Disc> knownMainDiscs;
 
 	/*
