@@ -6,10 +6,10 @@ package br.study.ebah.miguel.cdsCatalog.entities.jpa;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
@@ -18,7 +18,6 @@ import javax.persistence.ManyToOne;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
-import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
 /**
  * @author miguel
@@ -34,20 +33,12 @@ public class JPADisc implements Disc {
 	private String name;
 	private Date releaseDate;
 
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, targetEntity = JPASong.class)
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY, targetEntity = JPASong.class)
 	private List<? extends Song> songs;
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, targetEntity = JPAArtist.class)
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY, targetEntity = JPAArtist.class)
 	private Set<? extends Artist> artists;
-	@ManyToOne(targetEntity = JPAArtist.class)
+	@ManyToOne(targetEntity = JPAArtist.class, fetch = FetchType.LAZY, optional = true)
 	private Artist mainArtist;
-
-	public JPADisc(Disc disc) throws RepositoryException, ExecutionException {
-		setName(disc.getName());
-		setReleaseDate(disc.getReleaseDate());
-		setSongs((List<? extends Song>) disc.getSongs());
-		setArtists((Set<? extends Artist>) disc.getArtists());
-		setMainArtist(disc.getMainArtist());
-	}
 
 	/*
 	 * 

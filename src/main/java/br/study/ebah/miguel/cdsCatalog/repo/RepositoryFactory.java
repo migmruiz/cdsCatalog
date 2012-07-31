@@ -55,7 +55,6 @@ public final class RepositoryFactory {
 												+ " of MySQL RepositoryType");
 							}
 						case Hibernate:
-							// TODO replace Entities.class to JPAEntities.class
 							return new HibernateRepository<T>(t);
 
 						default:

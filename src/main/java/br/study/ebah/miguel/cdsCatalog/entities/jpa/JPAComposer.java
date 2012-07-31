@@ -4,14 +4,13 @@
 package br.study.ebah.miguel.cdsCatalog.entities.jpa;
 
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Composer;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
-import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
 /**
  * @author miguel
@@ -19,14 +18,8 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
  */
 @Entity
 public class JPAComposer extends JPAArtist implements Composer {
-	@OneToMany(mappedBy = "composer", targetEntity = JPASong.class)
+	@OneToMany(mappedBy = "composer", targetEntity = JPASong.class, fetch = FetchType.LAZY)
 	private Set<? extends Song> knownComposedSongs;
-
-	public JPAComposer(Composer composer) throws RepositoryException,
-			ExecutionException {
-		super(composer);
-		setKnownComposedSongs((Set<? extends Song>) composer.getKnownComposedSongs());
-	}
 
 	/*
 	 * 

@@ -1,5 +1,9 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
 import javax.annotation.Nonnull;
 
 import org.hibernate.Session;
@@ -40,17 +44,23 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 	}
 
 	public HibernateRepository(Class<? extends Entity> type) {
-		this.clazz = type;
+		this.clazz = toJPA(type);
 	}
 
-	// public static void main(String[] args) {
-	// createTables();
-	// }
-
-	@SuppressWarnings("unused")
-	private static void createTables() {
-		SchemaExport se = new SchemaExport(cfg);
-		se.create(true, true);
+	private static Class<? extends Entity> toJPA(Class<? extends Entity> type) {
+		Class<? extends Entity> jpaClazz;
+		if (type == Artist.class) {
+			jpaClazz = JPAArtist.class;
+		} else if (type == Composer.class) {
+			jpaClazz = JPAComposer.class;
+		} else if (type == Disc.class) {
+			jpaClazz = JPADisc.class;
+		} else if (type == Song.class) {
+			jpaClazz = JPASong.class;
+		} else {
+			jpaClazz = type;
+		}
+		return jpaClazz;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -80,15 +90,19 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 			if (entity.isTransient()) {
 				if (entity instanceof Artist) {
 					if (entity instanceof Composer) {
-						persistentEntity = (T) new JPAComposer(
-								(Composer) entity);
+						JPAComposer composer = new JPAComposer();
+						composer.setKnownComposedSongs((Set<? extends Song>) ((Composer) entity)
+								.getKnownComposedSongs());
+						persistentEntity = (T) composer;
 					} else {
-						persistentEntity = (T) new JPAArtist((Artist) entity);
+						persistentEntity = (T) new JPAArtist();
 					}
+					persistentEntity = (T) newArtist((Artist) entity,
+							persistentEntity);
 				} else if (entity instanceof Disc) {
-					persistentEntity = (T) new JPADisc((Disc) entity);
+					persistentEntity = (T) newDisc(entity);
 				} else if (entity instanceof Song) {
-					persistentEntity = (T) new JPASong((Song) entity);
+					persistentEntity = (T) newSong(entity);
 				} else {
 					throw new AssertionError();
 				}
@@ -96,7 +110,7 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 				persistentEntity = entity;
 			}
 			session = factory.openSession();
-			session.persist(persistentEntity);
+			session.save(persistentEntity);
 			session.close();
 			return getById(persistentEntity.getId());
 		} catch (Exception e) {
@@ -124,4 +138,52 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 	public void close() throws Exception {
 		factory.close();
 	}
+
+	private Song newSong(final T entity) throws RepositoryException {
+		JPASong nextSong = new JPASong();
+		Song prevSong = (Song) entity;
+		nextSong.setName(prevSong.getName());
+		nextSong.setFirstReleaseDate(prevSong.getFirstReleaseDate());
+		nextSong.setKnownDiscs((Set<? extends Disc>) prevSong.getKnownDiscs());
+		nextSong.setKnownArtists((Set<? extends Artist>) prevSong
+				.getKnownArtists());
+		nextSong.setComposer(prevSong.getComposer());
+		return nextSong;
+	}
+
+	private Disc newDisc(final T entity) throws RepositoryException,
+			ExecutionException {
+		JPADisc nextDisc = new JPADisc();
+		Disc prevDisc = (Disc) entity;
+		nextDisc.setName(prevDisc.getName());
+		nextDisc.setReleaseDate(prevDisc.getReleaseDate());
+		nextDisc.setSongs((List<? extends Song>) prevDisc.getSongs());
+		nextDisc.setArtists((Set<? extends Artist>) prevDisc.getArtists());
+		nextDisc.setMainArtist(prevDisc.getMainArtist());
+		return nextDisc;
+	}
+
+	private final Artist newArtist(final Artist prevArtist, T persistentEntity)
+			throws RepositoryException, ExecutionException {
+		JPAArtist nextArtist = (JPAArtist) persistentEntity;
+		nextArtist.setName(prevArtist.getName());
+		nextArtist.setBirthday(prevArtist.getBirthday());
+		nextArtist.setKnownSongs((Set<? extends Song>) prevArtist
+				.getKnownSongs());
+		nextArtist.setKnownDiscs((Set<? extends Disc>) prevArtist
+				.getKnownDiscs());
+		nextArtist.setKnownMainDiscs((Set<? extends Disc>) prevArtist
+				.getKnownMainDiscs());
+		return nextArtist;
+	}
+
+	@SuppressWarnings("unused")
+	private static void createTables() {
+		SchemaExport se = new SchemaExport(cfg);
+		se.create(true, true);
+	}
+
+//	public static void main(String[] args) {
+//		createTables();
+//	}
 }

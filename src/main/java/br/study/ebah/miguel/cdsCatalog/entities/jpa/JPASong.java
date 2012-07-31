@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
@@ -34,21 +35,13 @@ public class JPASong implements Song {
 	private String name;
 	private Date firstReleaseDate;
 
-	@ManyToMany(mappedBy = "songs", targetEntity = JPADisc.class)
+	@ManyToMany(mappedBy = "songs", targetEntity = JPADisc.class, fetch = FetchType.LAZY)
 	private Set<? extends Disc> knownDiscs;
-	@ManyToMany(mappedBy = "knownSongs", targetEntity = JPAArtist.class)
+	@ManyToMany(mappedBy = "knownSongs", targetEntity = JPAArtist.class, fetch = FetchType.LAZY)
 	private Set<? extends Artist> knownArtists;
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
 	@Target(JPAComposer.class)
 	private Composer composer;
-
-	public JPASong(Song song) throws RepositoryException {
-		setName(song.getName());
-		setFirstReleaseDate(song.getFirstReleaseDate());
-		setKnownDiscs((Set<? extends Disc>) song.getKnownDiscs());
-		setKnownArtists((Set<? extends Artist>) song.getKnownArtists());
-		setComposer(song.getComposer());
-	}
 
 	/*
 	 * 
