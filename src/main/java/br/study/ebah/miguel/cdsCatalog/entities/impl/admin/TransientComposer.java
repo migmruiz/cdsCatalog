@@ -3,10 +3,10 @@
  */
 package br.study.ebah.miguel.cdsCatalog.entities.impl.admin;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
@@ -25,11 +25,11 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
  */
 public class TransientComposer extends TransientArtist implements Composer {
 
-	private final List<Long> knownComposedSongsIds;
+	private final Set<Long> knownComposedSongsIds;
 
 	private final Repository<Song> songRepository;
 
-	private List<Song> knownComposedSongs;
+	private Set<Song> knownComposedSongs;
 
 	/*
 	 * 
@@ -45,8 +45,7 @@ public class TransientComposer extends TransientArtist implements Composer {
 	public TransientComposer(@Nonnull String name, @Nullable Date birthday,
 			RepositoryType repoType) throws ExecutionException {
 		super(name, birthday, repoType);
-		this.knownComposedSongsIds = Collections
-				.synchronizedList(new ArrayList<Long>());
+		this.knownComposedSongsIds = new ConcurrentSkipListSet<Long>();
 
 		this.songRepository = RepositoryFactory.getRepository(Song.class,
 				repoType);
@@ -60,7 +59,7 @@ public class TransientComposer extends TransientArtist implements Composer {
 	@Override
 	public Iterable<Song> getKnownComposedSongs() {
 		if (this.knownComposedSongs == null) {
-			knownComposedSongs = new ArrayList<>();
+			knownComposedSongs = new HashSet<>();
 			for (Long songId : this.knownComposedSongsIds) {
 				try {
 					knownComposedSongs.add(songRepository.getById(songId));

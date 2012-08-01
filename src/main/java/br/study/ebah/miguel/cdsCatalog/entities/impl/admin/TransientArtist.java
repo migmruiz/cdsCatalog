@@ -3,10 +3,10 @@
  */
 package br.study.ebah.miguel.cdsCatalog.entities.impl.admin;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
@@ -31,17 +31,17 @@ import com.google.common.base.Optional;
 public class TransientArtist implements Artist, IsWritable {
 	private Optional<Long> id = Optional.absent();
 	private final String name;
-	protected final List<Long> knownSongsIds;
-	private final List<Long> knownDiscsIds;
-	private final List<Long> knownMainDiscsIds;
+	protected final Set<Long> knownSongsIds;
+	private final Set<Long> knownDiscsIds;
+	private final Set<Long> knownMainDiscsIds;
 	private final Date birthday;
 
 	private final Repository<Song> songRepository;
 	private final Repository<Disc> discRepository;
 
-	private List<Song> knownSongs;
-	private List<Disc> knownDiscs;
-	private List<Disc> knownMainDiscs;
+	private Set<Song> knownSongs;
+	private Set<Disc> knownDiscs;
+	private Set<Disc> knownMainDiscs;
 
 	/*
 	 * 
@@ -58,17 +58,14 @@ public class TransientArtist implements Artist, IsWritable {
 			RepositoryType repoType) throws ExecutionException {
 		this.name = name;
 
-		this.knownSongsIds = Collections
-				.synchronizedList(new ArrayList<Long>());
-		this.knownDiscsIds = Collections
-				.synchronizedList(new ArrayList<Long>());
-		this.knownMainDiscsIds = Collections
-				.synchronizedList(new ArrayList<Long>());
+		this.knownSongsIds = new ConcurrentSkipListSet<Long>();
+		this.knownDiscsIds = new ConcurrentSkipListSet<Long>();
+		this.knownMainDiscsIds = new ConcurrentSkipListSet<Long>();
 
-		this.discRepository = RepositoryFactory
-				.getRepository(Disc.class, repoType);
-		this.songRepository = RepositoryFactory
-				.getRepository(Song.class, repoType);
+		this.discRepository = RepositoryFactory.getRepository(Disc.class,
+				repoType);
+		this.songRepository = RepositoryFactory.getRepository(Song.class,
+				repoType);
 
 		this.birthday = birthday;
 
@@ -162,7 +159,7 @@ public class TransientArtist implements Artist, IsWritable {
 	@Override
 	public Iterable<Song> getKnownSongs() {
 		if (this.knownSongs == null) {
-			knownSongs = new ArrayList<>();
+			knownSongs = new HashSet<>();
 			for (Long songId : this.knownSongsIds) {
 				try {
 					knownSongs.add(this.songRepository.getById(songId));
@@ -181,7 +178,7 @@ public class TransientArtist implements Artist, IsWritable {
 	@Override
 	public Iterable<Disc> getKnownDiscs() {
 		if (this.knownDiscs == null) {
-			knownDiscs = new ArrayList<>();
+			knownDiscs = new HashSet<>();
 			for (Long discId : this.knownDiscsIds) {
 				try {
 					knownDiscs.add(this.discRepository.getById(discId));
@@ -200,7 +197,7 @@ public class TransientArtist implements Artist, IsWritable {
 	@Override
 	public Iterable<Disc> getKnownMainDiscs() {
 		if (this.knownMainDiscs == null) {
-			knownMainDiscs = new ArrayList<>();
+			knownMainDiscs = new HashSet<>();
 			for (Long discId : this.knownMainDiscsIds) {
 				try {
 					knownMainDiscs.add(this.discRepository.getById(discId));

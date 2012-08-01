@@ -6,7 +6,10 @@ package br.study.ebah.miguel.cdsCatalog.entities.impl.admin;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 
 import br.study.ebah.miguel.cdsCatalog.actions.IsWritable;
@@ -29,7 +32,7 @@ public class TransientDisc implements Disc, IsWritable {
 	private Optional<Long> id = Optional.absent();
 	private final String name;
 	private final List<Long> songsIds;
-	private final List<Long> artistsIds;
+	private final Set<Long> artistsIds;
 	private Optional<Long> mainArtistId = Optional.absent();
 	private final Date releaseDate;
 
@@ -37,7 +40,7 @@ public class TransientDisc implements Disc, IsWritable {
 	private final Repository<Song> songRepository;
 
 	private List<Song> songs;
-	private List<Artist> artists;
+	private Set<Artist> artists;
 	private Artist mainArtist;
 
 	/*
@@ -56,7 +59,7 @@ public class TransientDisc implements Disc, IsWritable {
 		this.name = name;
 
 		this.songsIds = Collections.synchronizedList(new ArrayList<Long>());
-		this.artistsIds = Collections.synchronizedList(new ArrayList<Long>());
+		this.artistsIds = new ConcurrentSkipListSet<Long>();
 
 		this.artistRepository = RepositoryFactory.getRepository(Artist.class,
 				repoType);
@@ -109,7 +112,7 @@ public class TransientDisc implements Disc, IsWritable {
 	@Override
 	public Iterable<Artist> getArtists() {
 		if (this.artists == null) {
-			artists = new ArrayList<>();
+			artists = new HashSet<>();
 			for (Long artistId : this.artistsIds) {
 				try {
 					artists.add(this.artistRepository.getById(artistId));

@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
 
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
@@ -45,6 +44,8 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 
 	public HibernateRepository(Class<? extends Entity> type) {
 		this.clazz = toJPA(type);
+
+		factory.getCurrentSession().beginTransaction();
 	}
 
 	private static Class<? extends Entity> toJPA(Class<? extends Entity> type) {
@@ -66,25 +67,19 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public T getById(@Nonnull final Long id) throws RepositoryException {
-		Session session = factory.openSession();
-		try {
-			T gotIt = null;
-			gotIt = (T) session.load(this.clazz, id);
-			if (gotIt != null) {
-				return gotIt;
-			} else {
-				throw new RepositoryException(
-						"repository does not contain this entity");
-			}
-		} finally {
-			session.close();
+		T gotIt = (T) factory.getCurrentSession().load(this.clazz, id);
+		if (gotIt != null) {
+			return gotIt;
+		} else {
+			throw new RepositoryException(
+					"repository does not contain this entity");
 		}
+
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public T save(@Nonnull final T entity) throws RepositoryException {
-		Session session = null;
 		try {
 			T persistentEntity;
 			if (entity.isTransient()) {
@@ -109,9 +104,7 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 			} else {
 				persistentEntity = entity;
 			}
-			session = factory.openSession();
-			session.save(persistentEntity);
-			session.close();
+			factory.getCurrentSession().save(persistentEntity);
 			return getById(persistentEntity.getId());
 		} catch (Exception e) {
 			throw new RepositoryException(e);
@@ -120,13 +113,10 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 
 	@Override
 	public void delete(@Nonnull final T entity) throws RepositoryException {
-		Session session = factory.openSession();
 		try {
-			session.delete(entity);
+			factory.getCurrentSession().delete(entity);
 		} catch (Exception e) {
 			throw new RepositoryException(e);
-		} finally {
-			session.close();
 		}
 	}
 
@@ -136,6 +126,8 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 	 */
 	@Override
 	public void close() throws Exception {
+
+		factory.getCurrentSession().getTransaction().commit();
 		factory.close();
 	}
 
@@ -177,7 +169,7 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 		return nextArtist;
 	}
 
-//	@SuppressWarnings("unused")
+	// @SuppressWarnings("unused")
 	private static void createTables() {
 		SchemaExport se = new SchemaExport(cfg);
 		se.create(true, true);
