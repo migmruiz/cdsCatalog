@@ -15,9 +15,12 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
  * @author miguel
  * 
  */
-public class InMemoryRepository<T extends Entity> implements
-		Repository<T> {
+public class InMemoryRepository<T extends Entity> implements Repository<T> {
 	private final Map<Long, T> map = new ConcurrentHashMap<>();
+
+	@Override
+	public void init() {
+	}
 
 	@Override
 	public T getById(@Nonnull final Long id) throws RepositoryException {

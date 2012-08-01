@@ -246,4 +246,8 @@ public class MySQLSongRepository implements Repository<Song> {
 		con.close();
 	}
 
+	@Override
+	public void init() {
+	}
+
 }

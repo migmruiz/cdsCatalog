@@ -59,23 +59,35 @@ public class CdsDAO {
 			}
 		} finally {
 			try {
+				String name;
 				for (Disc disc : discs) {
 					authorLinks = Collections
 							.synchronizedList(new ArrayList<Map<String, String>>());
-					cdsContainer.put(disc.getName(), authorLinks);
+					name = disc.getName();
+					cdsContainer.put(name, authorLinks);
+					Artist mainArtist;
 					for (Artist artist : disc.getArtists()) {
 						cdLink = new ConcurrentHashMap<>();
-						cdLink.put("artist", artist.getName());
-						if (artist.equals(disc.getMainArtist())) {
-							cdLink.put("mainArtist", disc.getMainArtist()
-									.getName());
+						name = artist.getName();
+						cdLink.put("artist", name);
+						mainArtist = disc.getMainArtist();
+						if (artist.equals(mainArtist)) {
+							name = mainArtist.getName();
+							cdLink.put("mainArtist", name);
 						}
 						authorLinks.add(cdLink);
 					}
 				}
 			} catch (NullPointerException | RepositoryException
-					| ObjectNotFoundException | ExecutionException e) {
+					| ExecutionException e) {
 				throw new ServletException(e);
+			} catch (ObjectNotFoundException e) {
+				// TODO avoid ObjectNotFoundException, that is occurring
+				try {
+					authorLinks.add(cdLink);
+				} catch (Exception ex) {
+					throw new ServletException(ex);
+				}
 			}
 		}
 		return cdsContainer;

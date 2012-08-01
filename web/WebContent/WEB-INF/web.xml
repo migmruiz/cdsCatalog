@@ -20,6 +20,11 @@
 		</init-param>
 	</filter>
 
+	<filter>
+		<filter-name>RepositoryFilter</filter-name>
+		<filter-class>br.study.ebah.miguel.cdsCatalog.web.filter.RepositoryFilter</filter-class>
+	</filter>
+
 	<servlet>
 		<servlet-name>cdsCatalog Controller Servlet</servlet-name>
 		<servlet-class>br.study.ebah.miguel.cdsCatalog.web.controller.ControllerServlet</servlet-class>
@@ -31,15 +36,21 @@
 		<dispatcher>REQUEST</dispatcher>
 	</filter-mapping>
 
+	<filter-mapping>
+		<filter-name>RepositoryFilter</filter-name>
+		<url-pattern>/cdsCatalog</url-pattern>
+		<url-pattern>/cdsCatalog/*</url-pattern>
+	</filter-mapping>
+
 	<servlet-mapping>
 		<servlet-name>cdsCatalog Controller Servlet</servlet-name>
 		<url-pattern>/cdsCatalog</url-pattern>
 	</servlet-mapping>
-	
+
 	<welcome-file-list>
 		<welcome-file>cdsCatalog</welcome-file>
 	</welcome-file-list>
-		
+
 	<error-page>
 		<exception-type>java.lang.Exception</exception-type>
 		<location>/_static/error.html</location>

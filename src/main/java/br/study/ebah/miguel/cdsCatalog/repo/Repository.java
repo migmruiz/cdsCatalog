@@ -8,6 +8,9 @@ import javax.annotation.Nonnull;
  * 
  */
 public interface Repository<T> extends AutoCloseable {
+	
+	void init();
+	
 	T getById(@Nonnull Long id) throws RepositoryException;
 
 	T save(T t) throws RepositoryException;

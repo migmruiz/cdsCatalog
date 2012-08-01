@@ -232,4 +232,8 @@ public class MySQLDiscRepository implements Repository<Disc> {
 		con.close();
 	}
 
+	@Override
+	public void init() {
+	}
+
 }

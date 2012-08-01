@@ -132,4 +132,8 @@ public class MySQLComposerRepository implements Repository<Composer> {
 		con.close();
 	}
 
+	@Override
+	public void init() {
+	}
+
 }

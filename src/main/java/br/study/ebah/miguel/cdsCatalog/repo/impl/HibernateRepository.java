@@ -43,13 +43,7 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 			cfg.addAnnotatedClass(JPASong.class);
 			cfg.buildMappings();
 
-			if (factory != null && !factory.isClosed())
-				factory.close();
-			if (cfg.getProperty(Environment.SESSION_FACTORY_NAME) != null) {
-				cfg.buildSessionFactory();
-			} else {
-				factory = cfg.buildSessionFactory();
-			}
+			rebuildFactory();
 		} catch (Throwable ex) {
 			throw new ExceptionInInitializerError(ex);
 		}
@@ -57,24 +51,22 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 
 	public HibernateRepository(Class<? extends Entity> type) {
 		this.clazz = toJPA(type);
-
-		factory.getCurrentSession().beginTransaction();
 	}
 
-	private static Class<? extends Entity> toJPA(Class<? extends Entity> type) {
-		Class<? extends Entity> jpaClazz;
-		if (type == Artist.class) {
-			jpaClazz = JPAArtist.class;
-		} else if (type == Composer.class) {
-			jpaClazz = JPAComposer.class;
-		} else if (type == Disc.class) {
-			jpaClazz = JPADisc.class;
-		} else if (type == Song.class) {
-			jpaClazz = JPASong.class;
+	private static final void rebuildFactory() {
+		if (factory != null && !factory.isClosed())
+			factory.close();
+		if (cfg.getProperty(Environment.SESSION_FACTORY_NAME) != null) {
+			cfg.buildSessionFactory();
 		} else {
-			jpaClazz = type;
+			factory = cfg.buildSessionFactory();
 		}
-		return jpaClazz;
+	}
+
+	@Override
+	public void init() {
+		rebuildFactory();
+		factory.getCurrentSession().beginTransaction();;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -142,6 +134,22 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 			factory.getCurrentSession().getTransaction().commit();
 			factory.close();
 		}
+	}
+
+	private static Class<? extends Entity> toJPA(Class<? extends Entity> type) {
+		Class<? extends Entity> jpaClazz;
+		if (type == Artist.class) {
+			jpaClazz = JPAArtist.class;
+		} else if (type == Composer.class) {
+			jpaClazz = JPAComposer.class;
+		} else if (type == Disc.class) {
+			jpaClazz = JPADisc.class;
+		} else if (type == Song.class) {
+			jpaClazz = JPASong.class;
+		} else {
+			jpaClazz = type;
+		}
+		return jpaClazz;
 	}
 
 	private Song newSong(final T entity) throws RepositoryException {

@@ -244,4 +244,8 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		con.close();
 	}
 
+	@Override
+	public void init() {
+	}
+
 }

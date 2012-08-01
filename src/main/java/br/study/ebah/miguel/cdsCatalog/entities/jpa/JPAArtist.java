@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package br.study.ebah.miguel.cdsCatalog.entities.jpa;
 
 import java.util.Date;
@@ -24,8 +27,8 @@ import br.study.ebah.miguel.cdsCatalog.entities.Song;
  * 
  */
 @Entity
- @Cacheable
- @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class JPAArtist implements Artist {
 
 	@GeneratedValue
