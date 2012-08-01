@@ -2,13 +2,17 @@ package br.study.ebah.miguel.cdsCatalog.web.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
+
+import org.hibernate.ObjectNotFoundException;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
@@ -33,14 +37,24 @@ public class CdsDAO {
 			throws ServletException {
 		cdsContainer = new ConcurrentHashMap<>();
 
-		List<Disc> discs = Collections.synchronizedList(new ArrayList<Disc>());
+		Set<Disc> discs = Collections.synchronizedSet(new HashSet<Disc>());
 		boolean goOn = true;
 		try {
 			for (long i = 1L; goOn; i++) {
+				Disc gotIt = null;
 				try {
-					discs.add(discRepository.getById(i));
-				} catch (RepositoryException e) {
+					gotIt = discRepository.getById(i);
+					if (i > 10L) {
+						System.err
+								.println("FORCE limit: escaping main data fetch loop");
+						goOn = false;
+					}
+				} catch (RepositoryException | ObjectNotFoundException e) {
 					goOn = false;
+				} finally {
+					if (goOn) {
+						discs.add(gotIt);
+					}
 				}
 			}
 		} finally {
@@ -60,12 +74,11 @@ public class CdsDAO {
 					}
 				}
 			} catch (NullPointerException | RepositoryException
-					| ExecutionException e) {
+					| ObjectNotFoundException | ExecutionException e) {
 				throw new ServletException(e);
 			}
 		}
 		return cdsContainer;
-
 	}
 
 }

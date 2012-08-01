@@ -70,5 +70,10 @@
 			<artifactId>hibernate-c3p0</artifactId>
 			<version>3.5.6-Final</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-ehcache</artifactId>
+			<version>3.5.6-Final</version>
+		</dependency>
 	</dependencies>
 </project>

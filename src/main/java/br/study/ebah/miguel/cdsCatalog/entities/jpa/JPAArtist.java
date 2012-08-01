@@ -3,6 +3,7 @@ package br.study.ebah.miguel.cdsCatalog.entities.jpa;
 import java.util.Date;
 import java.util.Set;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -10,6 +11,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
@@ -20,8 +24,8 @@ import br.study.ebah.miguel.cdsCatalog.entities.Song;
  * 
  */
 @Entity
-// @Cacheable
-// @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+ @Cacheable
+ @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class JPAArtist implements Artist {
 
 	@GeneratedValue
@@ -31,11 +35,11 @@ public class JPAArtist implements Artist {
 	private String name;
 	private Date birthday;
 
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, targetEntity = JPASong.class, fetch = FetchType.EAGER)
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, targetEntity = JPASong.class, fetch = FetchType.LAZY)
 	private Set<? extends Song> knownSongs;
-	@ManyToMany(mappedBy = "artists", targetEntity = JPADisc.class, fetch = FetchType.EAGER)
+	@ManyToMany(mappedBy = "artists", targetEntity = JPADisc.class, fetch = FetchType.LAZY)
 	private Set<? extends Disc> knownDiscs;
-	@OneToMany(mappedBy = "mainArtist", targetEntity = JPADisc.class, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "mainArtist", targetEntity = JPADisc.class, fetch = FetchType.LAZY)
 	private Set<? extends Disc> knownMainDiscs;
 
 	/*

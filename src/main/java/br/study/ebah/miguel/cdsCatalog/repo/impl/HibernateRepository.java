@@ -6,8 +6,10 @@ import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
 
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AnnotationConfiguration;
+import org.hibernate.cfg.Environment;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
@@ -28,18 +30,29 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
  * 
  */
 public class HibernateRepository<T extends Entity> implements Repository<T> {
-	private static final SessionFactory factory;
+	private static SessionFactory factory;
 	private static final AnnotationConfiguration cfg;
 	private final Class<? extends Entity> clazz;
 
 	static {
-		cfg = new AnnotationConfiguration();
-		cfg.addAnnotatedClass(JPAArtist.class);
-		cfg.addAnnotatedClass(JPAComposer.class);
-		cfg.addAnnotatedClass(JPADisc.class);
-		cfg.addAnnotatedClass(JPASong.class);
-		cfg.buildMappings();
-		factory = cfg.buildSessionFactory();
+		try {
+			cfg = new AnnotationConfiguration();
+			cfg.addAnnotatedClass(JPAArtist.class);
+			cfg.addAnnotatedClass(JPAComposer.class);
+			cfg.addAnnotatedClass(JPADisc.class);
+			cfg.addAnnotatedClass(JPASong.class);
+			cfg.buildMappings();
+
+			if (factory != null && !factory.isClosed())
+				factory.close();
+			if (cfg.getProperty(Environment.SESSION_FACTORY_NAME) != null) {
+				cfg.buildSessionFactory();
+			} else {
+				factory = cfg.buildSessionFactory();
+			}
+		} catch (Throwable ex) {
+			throw new ExceptionInInitializerError(ex);
+		}
 	}
 
 	public HibernateRepository(Class<? extends Entity> type) {
@@ -67,12 +80,11 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public T getById(@Nonnull final Long id) throws RepositoryException {
-		T gotIt = (T) factory.getCurrentSession().load(this.clazz, id);
-		if (gotIt != null) {
-			return gotIt;
-		} else {
+		try {
+			return (T) factory.getCurrentSession().load(this.clazz, id);
+		} catch (ObjectNotFoundException e) {
 			throw new RepositoryException(
-					"repository does not contain this entity");
+					"repository does not contain this entity", e);
 		}
 
 	}
@@ -126,9 +138,10 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 	 */
 	@Override
 	public void close() throws Exception {
-
-		factory.getCurrentSession().getTransaction().commit();
-		factory.close();
+		if (factory != null && !factory.isClosed()) {
+			factory.getCurrentSession().getTransaction().commit();
+			factory.close();
+		}
 	}
 
 	private Song newSong(final T entity) throws RepositoryException {

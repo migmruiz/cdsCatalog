@@ -39,7 +39,7 @@ public class HibernateRepositoryTest {
 
 	}
 
-//	@Test
+	// @Test
 	public void saveTest() throws Exception {
 		TransientArtist localArtist = new TransientArtist(
 				"Antônio Carlos Jobim", new LocalDate(1973, 1, 22).toDate(),
@@ -82,13 +82,19 @@ public class HibernateRepositoryTest {
 		boolean goOn = true;
 		try {
 			for (long i = 1L; goOn; i++) {
+				Disc gotIt = null;
 				try {
-					discs.add(discRepository.getById(i));
-					if (i > 100) {
+					gotIt = discRepository.getById(i);
+					if (i > 1L) {
+						System.err.println("FORCE limit");
 						goOn = false;
 					}
-				} catch (RepositoryException | ObjectNotFoundException e) {
+				} catch (RepositoryException e) {
 					goOn = false;
+				} finally {
+					if (goOn) {
+						discs.add(gotIt);
+					}
 				}
 			}
 		} finally {

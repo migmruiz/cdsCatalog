@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.Cacheable;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,6 +15,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
@@ -24,8 +28,8 @@ import br.study.ebah.miguel.cdsCatalog.entities.Song;
  * 
  */
 @Entity
-// @Cacheable
-// @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class JPADisc implements Disc {
 
 	@GeneratedValue
@@ -35,11 +39,11 @@ public class JPADisc implements Disc {
 	private String name;
 	private Date releaseDate;
 
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.EAGER, targetEntity = JPASong.class)
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY, targetEntity = JPASong.class)
 	private List<? extends Song> songs;
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.EAGER, targetEntity = JPAArtist.class)
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY, targetEntity = JPAArtist.class)
 	private Set<? extends Artist> artists;
-	@ManyToOne(targetEntity = JPAArtist.class, fetch = FetchType.EAGER, optional = true)
+	@ManyToOne(targetEntity = JPAArtist.class, fetch = FetchType.LAZY, optional = true)
 	private Artist mainArtist;
 
 	/*

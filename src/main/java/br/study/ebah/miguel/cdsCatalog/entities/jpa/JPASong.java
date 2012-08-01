@@ -6,6 +6,7 @@ package br.study.ebah.miguel.cdsCatalog.entities.jpa;
 import java.util.Date;
 import java.util.Set;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -13,6 +14,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Target;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
@@ -26,8 +29,8 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
  * 
  */
 @Entity
-// @Cacheable
-// @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
 public class JPASong implements Song {
 
 	@GeneratedValue
@@ -37,11 +40,11 @@ public class JPASong implements Song {
 	private String name;
 	private Date firstReleaseDate;
 
-	@ManyToMany(mappedBy = "songs", targetEntity = JPADisc.class, fetch = FetchType.EAGER)
+	@ManyToMany(mappedBy = "songs", targetEntity = JPADisc.class, fetch = FetchType.LAZY)
 	private Set<? extends Disc> knownDiscs;
-	@ManyToMany(mappedBy = "knownSongs", targetEntity = JPAArtist.class, fetch = FetchType.EAGER)
+	@ManyToMany(mappedBy = "knownSongs", targetEntity = JPAArtist.class, fetch = FetchType.LAZY)
 	private Set<? extends Artist> knownArtists;
-	@ManyToOne(fetch = FetchType.EAGER, optional = true)
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
 	@Target(JPAComposer.class)
 	private Composer composer;
 
