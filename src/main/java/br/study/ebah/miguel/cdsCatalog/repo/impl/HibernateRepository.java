@@ -66,7 +66,8 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 	@Override
 	public void initialize() {
 		rebuildFactory();
-		factory.getCurrentSession().beginTransaction();;
+		factory.getCurrentSession().beginTransaction();
+		;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -190,13 +191,13 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 		return nextArtist;
 	}
 
-	// @SuppressWarnings("unused")
+	 @SuppressWarnings("unused")
 	private static void createTables() {
 		SchemaExport se = new SchemaExport(cfg);
 		se.create(true, true);
 	}
 
-	public static void main(String[] args) {
-		createTables();
-	}
+	// public static void main(String[] args) {
+	// createTables();
+	// }
 }
