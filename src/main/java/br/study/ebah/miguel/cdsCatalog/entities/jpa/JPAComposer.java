@@ -22,7 +22,7 @@ import br.study.ebah.miguel.cdsCatalog.entities.Song;
  */
 @Entity
 @Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class JPAComposer extends JPAArtist implements Composer {
 	@OneToMany(mappedBy = "composer", targetEntity = JPASong.class, fetch = FetchType.LAZY)
 	private Set<? extends Song> knownComposedSongs;

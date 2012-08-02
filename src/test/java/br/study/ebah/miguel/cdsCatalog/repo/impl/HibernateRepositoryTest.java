@@ -43,7 +43,7 @@ public class HibernateRepositoryTest {
 		artistRepository.initialize();
 	}
 
-	// @Test
+//	@Test
 	public void saveTest() throws Exception {
 		JPAArtist localArtist = new JPAArtist();
 		localArtist.setName("Antônio Carlos Jobim");

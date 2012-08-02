@@ -30,7 +30,7 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
  */
 @Entity
 @Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class JPASong implements Song {
 
 	@GeneratedValue

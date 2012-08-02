@@ -3,7 +3,6 @@ package br.study.ebah.miguel.cdsCatalog.web.controller;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -26,22 +25,23 @@ public class ControllerServlet extends HttpServlet {
 	private static final LocalDate creationDate = new LocalDate(2012, 7, 24);
 	private static final LocalDate lastModifiedDate = new LocalDate(2012, 7, 29);
 	private static final int expiresTimeInDays = 90;
-	private Repository<Disc> discRepository;
+
+	// @Override
+	// public void init(ServletConfig config) throws ServletException {
+	// super.init(config);
+	//
+	// }
 
 	@Override
-	public void init(ServletConfig config) throws ServletException {
-		super.init(config);
+	public void service(HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException {
+		Repository<Disc> discRepository;
 		try {
 			discRepository = RepositoryFactory.getRepository(Disc.class,
 					RepositoryType.Hibernate);
 		} catch (ExecutionException e) {
 			throw new ServletException(e);
 		}
-	}
-
-	@Override
-	public void service(HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
 		CdsDAO cdsDAO = new CdsDAO(discRepository);
 		response.setCharacterEncoding("UTF-8");
 		response.setDateHeader("Expires", lastModifiedDate.toDate().getTime()
@@ -63,19 +63,9 @@ public class ControllerServlet extends HttpServlet {
 				request, response);
 	}
 
-	@Override
-	public long getLastModified(HttpServletRequest req) {
-		// return lastModifiedDate.toDate().getTime();
-		return System.currentTimeMillis();
-	}
-
-	@Override
-	public void destroy() {
-		try {
-			discRepository.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		super.destroy();
-	}
+	// @Override
+	// public long getLastModified(HttpServletRequest req) {
+	// return lastModifiedDate.toDate().getTime();
+	// return System.currentTimeMillis();
+	// }
 }

@@ -29,7 +29,7 @@ import br.study.ebah.miguel.cdsCatalog.entities.Song;
  */
 @Entity
 @Cacheable
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class JPADisc implements Disc {
 
 	@GeneratedValue

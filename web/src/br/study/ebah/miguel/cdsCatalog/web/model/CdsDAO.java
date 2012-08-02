@@ -45,8 +45,8 @@ public class CdsDAO {
 				try {
 					gotIt = discRepository.getById(i);
 					if (i > 10L) {
-						System.err
-								.println("FORCE limit: escaping main data fetch loop");
+						System.err.println("FORCE limit: escaping main data"
+								+ " fetch loop");
 						goOn = false;
 					}
 				} catch (RepositoryException | ObjectNotFoundException e) {
@@ -59,21 +59,16 @@ public class CdsDAO {
 			}
 		} finally {
 			try {
-				String name;
 				for (Disc disc : discs) {
 					authorLinks = Collections
 							.synchronizedList(new ArrayList<Map<String, String>>());
-					name = disc.getName();
-					cdsContainer.put(name, authorLinks);
-					Artist mainArtist;
+					cdsContainer.put(disc.getName(), authorLinks);
 					for (Artist artist : disc.getArtists()) {
 						cdLink = new ConcurrentHashMap<>();
-						name = artist.getName();
-						cdLink.put("artist", name);
-						mainArtist = disc.getMainArtist();
+						cdLink.put("artist", artist.getName());
+						Artist mainArtist = disc.getMainArtist();
 						if (artist.equals(mainArtist)) {
-							name = mainArtist.getName();
-							cdLink.put("mainArtist", name);
+							cdLink.put("mainArtist", mainArtist.getName());
 						}
 						authorLinks.add(cdLink);
 					}
@@ -83,6 +78,8 @@ public class CdsDAO {
 				throw new ServletException(e);
 			} catch (ObjectNotFoundException e) {
 				// TODO avoid ObjectNotFoundException, that is occurring
+				System.err.println(e.getClass().getSimpleName() + " - cause : "
+						+ e.getCause() + " - entity : " + e.getEntityName());
 				try {
 					authorLinks.add(cdLink);
 				} catch (Exception ex) {
