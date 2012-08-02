@@ -1,7 +1,9 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.ObjectNotFoundException;
 import org.joda.time.LocalDate;
@@ -12,8 +14,8 @@ import org.junit.Test;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientDisc;
+import br.study.ebah.miguel.cdsCatalog.entities.jpa.JPAArtist;
+import br.study.ebah.miguel.cdsCatalog.entities.jpa.JPADisc;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
@@ -43,17 +45,19 @@ public class HibernateRepositoryTest {
 
 	// @Test
 	public void saveTest() throws Exception {
-		TransientArtist localArtist = new TransientArtist(
-				"Antônio Carlos Jobim", new LocalDate(1973, 1, 22).toDate(),
-				RepositoryType.Hibernate);
-		localArtist.setId(1L);
-		TransientDisc localDisc = new TransientDisc("Matita Perê",
-				new LocalDate(1973, 1, 22).toDate(), RepositoryType.Hibernate);
-		localDisc.setId(1L);
-		localDisc.asWritable(Artist.class).add(localArtist.getId());
-		localDisc.setMain(localArtist.getId());
-		localArtist.asWritable(Disc.class).add(localDisc.getId());
-		localArtist.setMain(localDisc.getId());
+		JPAArtist localArtist = new JPAArtist();
+		localArtist.setName("Antônio Carlos Jobim");
+		localArtist.setBirthday(new LocalDate(1973, 1, 22).toDate());
+		JPADisc localDisc = new JPADisc();
+		localDisc.setName("Matita Perê");
+		localDisc.setReleaseDate(new LocalDate(1973, 1, 22).toDate());
+		Set<Artist> artists = new HashSet<>();
+		artists.add(localArtist);
+		localDisc.setArtists(artists);
+		localDisc.setMainArtist(localArtist);
+		Set<Disc> discs = new HashSet<>();
+		discs.add(localDisc);
+		localArtist.setKnownMainDiscs(discs);
 		artistRepository.save(localArtist);
 		discRepository.save(localDisc);
 	}
