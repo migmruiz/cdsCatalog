@@ -245,7 +245,7 @@ public class MySQLArtistRepository implements Repository<Artist> {
 	}
 
 	@Override
-	public void init() {
+	public void initialize() {
 	}
 
 }

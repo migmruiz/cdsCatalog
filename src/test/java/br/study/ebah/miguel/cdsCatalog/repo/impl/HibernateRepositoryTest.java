@@ -37,8 +37,8 @@ public class HibernateRepositoryTest {
 		artistRepository = RepositoryFactory.getRepository(Artist.class,
 				RepositoryType.Hibernate);
 
-		discRepository.init();
-		artistRepository.init();
+		discRepository.initialize();
+		artistRepository.initialize();
 	}
 
 	// @Test

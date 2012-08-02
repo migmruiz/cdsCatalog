@@ -247,7 +247,7 @@ public class MySQLSongRepository implements Repository<Song> {
 	}
 
 	@Override
-	public void init() {
+	public void initialize() {
 	}
 
 }

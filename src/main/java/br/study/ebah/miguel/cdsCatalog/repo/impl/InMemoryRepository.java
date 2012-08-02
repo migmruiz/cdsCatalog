@@ -19,7 +19,7 @@ public class InMemoryRepository<T extends Entity> implements Repository<T> {
 	private final Map<Long, T> map = new ConcurrentHashMap<>();
 
 	@Override
-	public void init() {
+	public void initialize() {
 	}
 
 	@Override

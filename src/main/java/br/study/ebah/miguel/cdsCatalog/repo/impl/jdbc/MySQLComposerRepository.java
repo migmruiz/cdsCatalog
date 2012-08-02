@@ -133,7 +133,7 @@ public class MySQLComposerRepository implements Repository<Composer> {
 	}
 
 	@Override
-	public void init() {
+	public void initialize() {
 	}
 
 }

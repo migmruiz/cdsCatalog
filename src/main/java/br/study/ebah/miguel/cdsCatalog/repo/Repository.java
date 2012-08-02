@@ -2,14 +2,14 @@ package br.study.ebah.miguel.cdsCatalog.repo;
 
 import javax.annotation.Nonnull;
 
+import org.apache.avalon.framework.activity.Initializable;
+
 /**
  * 
  * @author bruno
  * 
  */
-public interface Repository<T> extends AutoCloseable {
-	
-	void init();
+public interface Repository<T> extends AutoCloseable, Initializable {
 	
 	T getById(@Nonnull Long id) throws RepositoryException;
 

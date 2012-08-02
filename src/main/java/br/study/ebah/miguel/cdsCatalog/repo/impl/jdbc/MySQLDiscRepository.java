@@ -233,7 +233,7 @@ public class MySQLDiscRepository implements Repository<Disc> {
 	}
 
 	@Override
-	public void init() {
+	public void initialize() {
 	}
 
 }

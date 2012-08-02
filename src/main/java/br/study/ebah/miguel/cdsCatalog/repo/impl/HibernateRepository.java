@@ -64,7 +64,7 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 	}
 
 	@Override
-	public void init() {
+	public void initialize() {
 		rebuildFactory();
 		factory.getCurrentSession().beginTransaction();;
 	}

@@ -30,10 +30,10 @@ public class RepositoryFilter implements Filter {
 						.getRepository(Disc.class, RepositoryType.Hibernate);
 				Repository<Song> songRepository = RepositoryFactory
 						.getRepository(Song.class, RepositoryType.Hibernate)) {
-			artistRepository.init();
-			composerRepository.init();
-			discRepository.init();
-			songRepository.init();
+			artistRepository.initialize();
+			composerRepository.initialize();
+			discRepository.initialize();
+			songRepository.initialize();
 
 			chain.doFilter(request, response);
 		} catch (Throwable ex) {
