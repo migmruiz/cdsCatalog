@@ -2,6 +2,7 @@ package br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -10,6 +11,7 @@ import javax.annotation.Nonnull;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Composer;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
 import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentComposer;
 import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientComposer;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
@@ -28,6 +30,7 @@ public class MySQLComposerRepository implements Repository<Composer> {
 
 	private static final Connection con;
 	private static final PreparedStatement insertComposerStmt;
+	private static final PreparedStatement composedSongStmt;
 	private static final MySQLConnectionFactory connFact;
 
 	static {
@@ -44,6 +47,8 @@ public class MySQLComposerRepository implements Repository<Composer> {
 				insertComposerStmt = con
 						.prepareStatement("INSERT INTO composer id_composer"
 								+ " VALUE ?;");
+				composedSongStmt = con.prepareStatement("SELECT * FROM song"
+						+ " WHERE id_composer=?");
 			} catch (SQLException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -114,11 +119,22 @@ public class MySQLComposerRepository implements Repository<Composer> {
 
 	private final Composer pullComposer(@Nonnull final Long id)
 			throws SQLException, ExecutionException, SQLDBNoDataException {
+		Preconditions.checkState(!composedSongStmt.isClosed(),
+				"cannot execute query if statement is closed");
 		Artist tempArtist = MySQLArtistRepository.pullArtist(id);
-		Composer composer = new TransientComposer(tempArtist.getName(),
-				tempArtist.getBirthday(), RepositoryType.MySQL);
-		// TODO import composed songs and create constructor Composer(Artist
-		// tempArtist)
+		TransientComposer composer = new TransientComposer(tempArtist,
+				RepositoryType.MySQL);
+
+		try (ResultSet rs = composedSongStmt.executeQuery()) {
+			if (rs.first()) {
+				long song_id = rs.getLong("id_song");
+				if (song_id != 0L) {
+					composer.asWritable(Song.class).add(song_id);
+					composer.setMain(song_id);
+				}
+			}
+		}
+
 		return composer;
 	}
 

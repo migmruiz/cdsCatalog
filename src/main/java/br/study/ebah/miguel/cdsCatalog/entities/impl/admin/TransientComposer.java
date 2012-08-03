@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Composer;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
@@ -34,6 +35,13 @@ public class TransientComposer extends TransientArtist implements Composer {
 	/*
 	 * 
 	 */
+	public TransientComposer(Artist artist, RepositoryType repoType) throws ExecutionException {
+		this(artist.getName(), artist.getBirthday(), repoType);
+	}
+	
+	/*
+	 * 
+	 */
 	public TransientComposer(@Nonnull String name, RepositoryType repoType)
 			throws ExecutionException {
 		this(name, null, repoType);
@@ -50,7 +58,7 @@ public class TransientComposer extends TransientArtist implements Composer {
 		this.songRepository = RepositoryFactory.getRepository(Song.class,
 				repoType);
 	}
-
+	
 	/*
 	 * 
 	 * @see
