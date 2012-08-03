@@ -7,6 +7,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -15,6 +17,7 @@ import javax.annotation.Nonnull;
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
 import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentArtist;
 import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
@@ -41,9 +44,12 @@ public class MySQLArtistRepository implements Repository<Artist> {
 	private static final PreparedStatement idStmt;
 	private static final PreparedStatement mainDiscStmt;
 	private static final PreparedStatement workingOnDiscsStmt;
+	private static final PreparedStatement artistsSongStmt;
 	private static final PreparedStatement insertArtistStmt;
 	private static final PreparedStatement updateArtistStmt;
 	private static final PreparedStatement deleteArtistStmt;
+	private static final PreparedStatement insertWorkingOnStmt;
+	private static final PreparedStatement insertArtistSongStmt;
 	private static final MySQLConnectionFactory connFact;
 
 	static {
@@ -64,6 +70,9 @@ public class MySQLArtistRepository implements Repository<Artist> {
 				workingOnDiscsStmt = con
 						.prepareStatement("SELECT * FROM `disc_artist-workingOn`"
 								+ " WHERE id_artist=?");
+				artistsSongStmt = con
+						.prepareStatement("SELECT * FROM `artist_song`"
+								+ " WHERE id_artist=?");
 				insertArtistStmt = con.prepareStatement(
 						"INSERT INTO artist (name,birthday) VALUES (?,?);",
 						Statement.RETURN_GENERATED_KEYS);
@@ -72,6 +81,12 @@ public class MySQLArtistRepository implements Repository<Artist> {
 								+ " WHERE id_artist=?;");
 				deleteArtistStmt = con.prepareStatement("DELETE FROM artist"
 						+ " WHERE id_artist=?;");
+				insertWorkingOnStmt = con
+						.prepareStatement("INSERT INTO `disc_artist-workingOn` (id_disc, id_artist)"
+								+ " VALUES (?,?);");
+				insertArtistSongStmt = con
+						.prepareStatement("INSERT INTO `artist_song` (id_artist, id_song)"
+								+ " VALUES (?,?);");
 			} catch (SQLException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -115,7 +130,7 @@ public class MySQLArtistRepository implements Repository<Artist> {
 				updateArtist(artist);
 				cache.invalidate(artist.getId());
 			}
-		} catch (SQLException e) {
+		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);
 		}
 
@@ -138,11 +153,11 @@ public class MySQLArtistRepository implements Repository<Artist> {
 
 	final static Artist pullArtist(@Nonnull final Long id) throws SQLException,
 			ExecutionException, SQLDBNoDataException {
-		Preconditions
-				.checkState(
-						!(idStmt.isClosed() || mainDiscStmt.isClosed() || workingOnDiscsStmt
-								.isClosed()),
-						"cannot execute query if statement is closed");
+		Preconditions.checkState(
+				!(idStmt.isClosed() || mainDiscStmt.isClosed()
+						|| workingOnDiscsStmt.isClosed() || artistsSongStmt
+						.isClosed()),
+				"cannot execute query if statement is closed");
 
 		idStmt.setLong(1, id.longValue());
 		TransientArtist artist;
@@ -178,19 +193,45 @@ public class MySQLArtistRepository implements Repository<Artist> {
 			}
 		}
 
+		Writable<Song> songWritableArtist = artist.asWritable(Song.class);
+
+		artistsSongStmt.setLong(1, id.longValue());
+		try (ResultSet rs = artistsSongStmt.executeQuery()) {
+			while (rs.next()) {
+				songWritableArtist.add(rs.getLong("id_song"));
+			}
+		}
+
 		artist.setId(id);
 
 		return artist;
 	}
 
-	final static long insertArtist(@Nonnull Artist artist) throws SQLException {
-		Preconditions.checkState(!(insertArtistStmt.isClosed()),
-				"cannot execute query if statement is closed");
+	final static long insertArtist(@Nonnull Artist artist) throws SQLException,
+			RepositoryException, ExecutionException {
+		Preconditions
+				.checkState(
+						!(insertArtistStmt.isClosed()
+								&& insertWorkingOnStmt.isClosed() && insertArtistSongStmt
+								.isClosed()),
+						"cannot execute query if statement is closed");
 
 		insertArtistStmt.setString(1, artist.getName());
 		insertArtistStmt.setDate(2, new java.sql.Date(artist.getBirthday()
 				.getTime()));
 		int rows = insertArtistStmt.executeUpdate();
+
+		for (Disc disc : artist.getKnownDiscs()) {
+			insertWorkingOnStmt.setLong(1, disc.getId());
+			insertWorkingOnStmt.setLong(2, artist.getId());
+			insertWorkingOnStmt.executeUpdate();
+		}
+		for (Song song : artist.getKnownSongs()) {
+			insertArtistSongStmt.setLong(1, artist.getId());
+			insertArtistSongStmt.setLong(2, song.getId());
+			insertArtistSongStmt.executeUpdate();
+		}
+
 		try (ResultSet rs = insertArtistStmt.getGeneratedKeys()) {
 			ResultSetMetaData metaData = rs.getMetaData();
 			if (rows == 1 && metaData.getColumnCount() == 1) {
@@ -199,11 +240,15 @@ public class MySQLArtistRepository implements Repository<Artist> {
 				throw new SQLException("no rows affected");
 			}
 		}
-		// TODO update/insert into many-to-many tables
 	}
 
-	final static void updateArtist(@Nonnull Artist artist) throws SQLException {
-		Preconditions.checkState(!(updateArtistStmt.isClosed()),
+	final static void updateArtist(@Nonnull Artist artist) throws SQLException,
+			RepositoryException, ExecutionException {
+		Preconditions.checkState(
+				!(updateArtistStmt.isClosed() || workingOnDiscsStmt.isClosed()
+						|| insertWorkingOnStmt.isClosed()
+						|| artistsSongStmt.isClosed() || insertArtistSongStmt
+						.isClosed()),
 				"cannot execute query if statement is closed");
 
 		updateArtistStmt.setString(1, artist.getName());
@@ -215,6 +260,42 @@ public class MySQLArtistRepository implements Repository<Artist> {
 			throw new SQLException("no rows affected");
 		}
 		// TODO update many-to-many tables
+
+		Set<Disc> knownDiscs = new HashSet<>();
+		for (Disc disc : artist.getKnownDiscs()) {
+			knownDiscs.add(disc);
+		}
+
+		workingOnDiscsStmt.setLong(1, artist.getId());
+		try (ResultSet rs = workingOnDiscsStmt.executeQuery()) {
+			while (rs.next()) {
+				knownDiscs.remove(rs.getLong("id_disc"));
+			}
+		}
+
+		for (Disc disc : knownDiscs) {
+			insertWorkingOnStmt.setLong(1, disc.getId());
+			insertWorkingOnStmt.setLong(2, artist.getId());
+			insertWorkingOnStmt.executeUpdate();
+		}
+
+		Set<Song> knownSongs = new HashSet<>();
+		for (Song song : artist.getKnownSongs()) {
+			knownSongs.add(song);
+		}
+
+		artistsSongStmt.setLong(1, artist.getId());
+		try (ResultSet rs = artistsSongStmt.executeQuery()) {
+			while (rs.next()) {
+				knownSongs.remove(rs.getLong("id_song"));
+			}
+		}
+
+		for (Song song : knownSongs) {
+			insertArtistSongStmt.setLong(1, artist.getId());
+			insertArtistSongStmt.setLong(2, song.getId());
+			insertArtistSongStmt.executeUpdate();
+		}
 	}
 
 	final static void deleteArtist(@Nonnull Artist artist) throws SQLException {

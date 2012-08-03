@@ -95,7 +95,7 @@ public class MySQLComposerRepository implements Repository<Composer> {
 				MySQLArtistRepository.updateArtist(composer);
 				cache.invalidate(composer.getId());
 			}
-		} catch (SQLException e) {
+		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);
 		}
 

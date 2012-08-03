@@ -23,7 +23,7 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
  * @author miguel
  * 
  */
-public class MySQLRepositoryTest {
+public class InMemoryRepositoryTest {
 
 	private static Disc disc;
 	private static Repository<Disc> discRepository;
@@ -31,12 +31,35 @@ public class MySQLRepositoryTest {
 	@BeforeClass
 	public static void setUp() throws Exception {
 		discRepository = RepositoryFactory.getRepository(Disc.class,
-				RepositoryType.MySQL);
-		disc = discRepository.getById(1L);
+				RepositoryType.InMemory);
+	}
+	
+
+	@Test
+	public void saveTest() throws Exception {
+		TransientArtist transientArtist = new TransientArtist("Dave Grohl",
+				new LocalDate(1969, 1, 14).toDate(), RepositoryType.InMemory);
+
+		TransientDisc transientDisc = new TransientDisc("Nevermind",
+				new LocalDate(1991, 9, 24).toDate(), RepositoryType.InMemory);
+
+		transientDisc.setId(1L); 
+		transientDisc.asWritable(Artist.class).add(transientArtist);
+		transientDisc.setMain(transientArtist.getId());
+		
+		discRepository.save(transientDisc);
+		
+		transientArtist.setId(1L); 
+		transientArtist.asWritable(Disc.class).add(transientDisc);
+		transientArtist.setMain(transientDisc.getId());
+
+		RepositoryFactory.getRepository(Artist.class, RepositoryType.InMemory)
+				.save(transientArtist);
 	}
 
 	@Test
-	public void constructorTest() {
+	public void constructorTest() throws Exception {
+		disc = discRepository.getById(1L);
 		Assert.assertNotNull(disc);
 	}
 
@@ -49,27 +72,6 @@ public class MySQLRepositoryTest {
 	public void getMainArtistTest() throws RepositoryException,
 			ExecutionException {
 		Assert.assertNotNull(disc.getMainArtist().getName());
-	}
-	
-	@Test
-	public void saveTest() throws Exception {
-		TransientArtist transientArtist = new TransientArtist("Dave Grohl",
-				new LocalDate(1969, 1, 14).toDate(), RepositoryType.MySQL);
-		transientArtist.setId(3L);
-		
-		TransientDisc transientDisc = new TransientDisc("Nevermind",
-				new LocalDate(1991, 9, 24).toDate(), RepositoryType.MySQL);
-		transientDisc.setId(3L); 
-		
-		transientDisc.asWritable(Artist.class).add(transientArtist);
-		transientDisc.setMain(transientArtist.getId());
-		
-		discRepository.save(transientDisc);
-		transientArtist.asWritable(Disc.class).add(transientDisc);
-		transientArtist.setMain(transientDisc.getId());
-
-		RepositoryFactory.getRepository(Artist.class, RepositoryType.MySQL)
-				.save(transientArtist);
 	}
 
 	@Test
