@@ -20,11 +20,6 @@
 		</init-param>
 	</filter>
 
-	<filter>
-		<filter-name>RepositoryFilter</filter-name>
-		<filter-class>br.study.ebah.miguel.cdsCatalog.web.filter.RepositoryFilter</filter-class>
-	</filter>
-
 	<servlet>
 		<servlet-name>cdsCatalog Controller Servlet</servlet-name>
 		<servlet-class>br.study.ebah.miguel.cdsCatalog.web.controller.ControllerServlet</servlet-class>
@@ -34,12 +29,6 @@
 		<filter-name>ExpiresFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 		<dispatcher>REQUEST</dispatcher>
-	</filter-mapping>
-
-	<filter-mapping>
-		<filter-name>RepositoryFilter</filter-name>
-		<url-pattern>/cdsCatalog</url-pattern>
-		<url-pattern>/cdsCatalog/*</url-pattern>
 	</filter-mapping>
 
 	<servlet-mapping>

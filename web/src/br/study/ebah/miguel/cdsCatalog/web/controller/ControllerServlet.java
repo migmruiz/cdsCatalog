@@ -10,7 +10,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.joda.time.LocalDate;
 
+import br.study.ebah.miguel.cdsCatalog.entities.Artist;
+import br.study.ebah.miguel.cdsCatalog.entities.Composer;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
+import br.study.ebah.miguel.cdsCatalog.entities.Song;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
@@ -35,14 +38,6 @@ public class ControllerServlet extends HttpServlet {
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
-		Repository<Disc> discRepository;
-		try {
-			discRepository = RepositoryFactory.getRepository(Disc.class,
-					RepositoryType.Hibernate);
-		} catch (ExecutionException e) {
-			throw new ServletException(e);
-		}
-		CdsDAO cdsDAO = new CdsDAO(discRepository);
 		response.setCharacterEncoding("UTF-8");
 		response.setDateHeader("Expires", lastModifiedDate.toDate().getTime()
 				+ expiresTimeInDays * 24 * 60 * 60 * 1000);
@@ -56,9 +51,29 @@ public class ControllerServlet extends HttpServlet {
 		request.setAttribute("title", title);
 		request.setAttribute("author", author);
 		request.setAttribute("date", date);
-		request.setAttribute("cdsWithArtistsContainer",
-				cdsDAO.getContainerWithArtists());
+		
+		try (Repository<Artist> artistRepository = RepositoryFactory
+				.getRepository(Artist.class, RepositoryType.Hibernate);
+				Repository<Composer> composerRepository = RepositoryFactory
+						.getRepository(Composer.class, RepositoryType.Hibernate);
+				Repository<Disc> discRepository = RepositoryFactory
+						.getRepository(Disc.class, RepositoryType.Hibernate);
+				Repository<Song> songRepository = RepositoryFactory
+						.getRepository(Song.class, RepositoryType.Hibernate)) {
+			artistRepository.initialize();
+			composerRepository.initialize();
+			discRepository.initialize();
+			songRepository.initialize();
+			CdsDAO cdsDAO = new CdsDAO(discRepository);
+			
+			request.setAttribute("cdsWithArtistsContainer",
+					cdsDAO.getContainerWithArtists());
 
+		} catch (ExecutionException e) {
+			throw new ServletException(e);
+		} catch (Exception e1) {
+			throw new ServletException(e1);
+		}
 		request.getRequestDispatcher("/WEB-INF/pages/MainPage.jsp").forward(
 				request, response);
 	}

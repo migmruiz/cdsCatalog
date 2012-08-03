@@ -44,13 +44,20 @@ public class CdsDAO {
 				Disc gotIt = null;
 				try {
 					gotIt = discRepository.getById(i);
-					if (i > 10L) {
-						System.err.println("FORCE limit: escaping main data"
+					if (i > 1L) {
+						System.err.println("dao FORCE limit: escaping main data"
 								+ " fetch loop");
 						goOn = false;
 					}
-				} catch (RepositoryException | ObjectNotFoundException e) {
+				} catch (RepositoryException e) {
 					goOn = false;
+				} catch (ObjectNotFoundException e) {
+					goOn = false;
+					// TODO avoid ObjectNotFoundException, that is occurring
+					System.err
+							.println("dao on load " + e.getClass().getSimpleName()
+									+ " - cause : " + e.getCause()
+									+ " - entity : " + e.getEntityName());
 				} finally {
 					if (goOn) {
 						discs.add(gotIt);
@@ -60,15 +67,25 @@ public class CdsDAO {
 		} finally {
 			try {
 				for (Disc disc : discs) {
+					System.err.println("dao on read flag 1");
 					authorLinks = Collections
 							.synchronizedList(new ArrayList<Map<String, String>>());
-					cdsContainer.put(disc.getName(), authorLinks);
+
+					System.err.println("dao on read flag 1.1");
+					try {
+						cdsContainer.put(disc.getName(), authorLinks);
+					} catch (Exception e) {
+						System.err.println("dao on read error flag 1.2: " + e.getMessage());
+					}
+					System.err.println("dao on read flag 2");
 					for (Artist artist : disc.getArtists()) {
+						System.err.println("dao on read flag 3");
 						cdLink = new ConcurrentHashMap<>();
 						cdLink.put("artist", artist.getName());
 						Artist mainArtist = disc.getMainArtist();
 						if (artist.equals(mainArtist)) {
 							cdLink.put("mainArtist", mainArtist.getName());
+							System.err.println("dao on read flag 4");
 						}
 						authorLinks.add(cdLink);
 					}
@@ -78,13 +95,9 @@ public class CdsDAO {
 				throw new ServletException(e);
 			} catch (ObjectNotFoundException e) {
 				// TODO avoid ObjectNotFoundException, that is occurring
-				System.err.println(e.getClass().getSimpleName() + " - cause : "
-						+ e.getCause() + " - entity : " + e.getEntityName());
-				try {
-					authorLinks.add(cdLink);
-				} catch (Exception ex) {
-					throw new ServletException(ex);
-				}
+				System.err.println("dao on read " + e.getClass().getSimpleName()
+						+ " - cause : " + e.getCause() + " - entity : "
+						+ e.getEntityName());
 			}
 		}
 		return cdsContainer;
