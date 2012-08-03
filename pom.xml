@@ -4,7 +4,7 @@
 
 	<groupId>br.study.ebah.miguel</groupId>
 	<artifactId>cdsCatalog</artifactId>
-	<version>0.2</version>
+	<version>0.3</version>
 	<packaging>jar</packaging>
 
 	<name>cdsCatalog</name>
