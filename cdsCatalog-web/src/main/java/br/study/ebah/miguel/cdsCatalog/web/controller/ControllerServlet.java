@@ -1,7 +1,7 @@
 package br.study.ebah.miguel.cdsCatalog.web.controller;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Composer;
@@ -26,32 +28,30 @@ public class ControllerServlet extends HttpServlet {
 	 * time-stamps
 	 */
 	private static final LocalDate creationDate = new LocalDate(2012, 7, 24);
-	private static final LocalDate lastModifiedDate = new LocalDate(2012, 7, 29);
+	private static final LocalDate lastModifiedDate = new LocalDate(2012, 8, 6);
 	private static final int expiresTimeInDays = 90;
-
-	// @Override
-	// public void init(ServletConfig config) throws ServletException {
-	// super.init(config);
-	//
-	// }
 
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
 		response.setCharacterEncoding("UTF-8");
 		response.setDateHeader("Expires", lastModifiedDate.toDate().getTime()
-				+ expiresTimeInDays * 24 * 60 * 60 * 1000);
+				+ TimeUnit.DAYS.toMillis(expiresTimeInDays));
 
 		String title = "cdsCatalog";
 		String author = "Miguel Mendes Ruiz";
-		String date = creationDate.yearOfEra().getAsText()
-				+ String.format("%02d", creationDate.monthOfYear().get())
-				+ creationDate.dayOfMonth().getAsText();
+
+		DateTimeFormatter dateTimeFormatter = DateTimeFormat
+				.forPattern("yyyyMMdd");
+
+		String creationDateStr = creationDate.toString(dateTimeFormatter);
+
+		System.out.println(creationDateStr);
 
 		request.setAttribute("title", title);
 		request.setAttribute("author", author);
-		request.setAttribute("date", date);
-		
+		request.setAttribute("date", creationDateStr);
+
 		try (Repository<Artist> artistRepository = RepositoryFactory
 				.getRepository(Artist.class, RepositoryType.Hibernate);
 				Repository<Composer> composerRepository = RepositoryFactory
@@ -65,14 +65,12 @@ public class ControllerServlet extends HttpServlet {
 			discRepository.initialize();
 			songRepository.initialize();
 			CdsDAO cdsDAO = new CdsDAO(discRepository);
-			
+
 			request.setAttribute("cdsWithArtistsContainer",
 					cdsDAO.getContainerWithArtists());
 
-		} catch (ExecutionException e) {
+		} catch (Exception e) {
 			throw new ServletException(e);
-		} catch (Exception e1) {
-			throw new ServletException(e1);
 		}
 		request.getRequestDispatcher("/WEB-INF/pages/MainPage.jsp").forward(
 				request, response);
@@ -83,4 +81,5 @@ public class ControllerServlet extends HttpServlet {
 	// return lastModifiedDate.toDate().getTime();
 	// return System.currentTimeMillis();
 	// }
+
 }
