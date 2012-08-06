@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,7 +36,7 @@ public class InMemoryRepositoryTest {
 	}
 	
 
-	@Test
+	@Test @Before
 	public void saveTest() throws Exception {
 		TransientArtist transientArtist = new TransientArtist("Dave Grohl",
 				new LocalDate(1969, 1, 14).toDate(), RepositoryType.InMemory);
@@ -56,7 +57,7 @@ public class InMemoryRepositoryTest {
 		RepositoryFactory.getRepository(Artist.class, RepositoryType.InMemory)
 				.save(transientArtist);
 	}
-
+	
 	@Test
 	public void constructorTest() throws Exception {
 		disc = discRepository.getById(1L);
@@ -101,6 +102,7 @@ public class InMemoryRepositoryTest {
 	@AfterClass
 	public static void close() throws Exception {
 		discRepository.close();
+		RepositoryFactory.destroy();
 	}
 
 }

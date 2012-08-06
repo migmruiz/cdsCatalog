@@ -51,7 +51,7 @@ public class MySQLRepositoryTest {
 		Assert.assertNotNull(disc.getMainArtist().getName());
 	}
 	
-	@Test
+//	@Test
 	public void saveTest() throws Exception {
 		TransientArtist transientArtist = new TransientArtist("Dave Grohl",
 				new LocalDate(1969, 1, 14).toDate(), RepositoryType.MySQL);
@@ -99,6 +99,7 @@ public class MySQLRepositoryTest {
 	@AfterClass
 	public static void close() throws Exception {
 		discRepository.close();
+		RepositoryFactory.destroy();
 	}
 
 }

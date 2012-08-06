@@ -9,6 +9,7 @@ import org.hibernate.ObjectNotFoundException;
 import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -62,7 +63,7 @@ public class HibernateRepositoryTest {
 		discRepository.save(localDisc);
 	}
 
-	@Test
+	@Test @Before
 	public void getByIdTest() throws Exception {
 		disc = discRepository.getById(1L);
 		artist = artistRepository.getById(1L);
@@ -92,7 +93,7 @@ public class HibernateRepositoryTest {
 				try {
 					gotIt = discRepository.getById(i);
 					if (i > 1L) {
-						System.err.println("FORCE limit");
+						System.out.println("FORCE limit");
 						goOn = false;
 					}
 				} catch (RepositoryException e) {
@@ -119,6 +120,7 @@ public class HibernateRepositoryTest {
 	public static void close() throws Exception {
 		artistRepository.close();
 		discRepository.close();
+		RepositoryFactory.destroy();
 	}
 
 }

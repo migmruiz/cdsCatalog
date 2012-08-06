@@ -20,7 +20,7 @@ import com.google.common.cache.CacheBuilder;
 
 /**
  * 
- * @author bruno
+ * @author bruno, miguel
  * 
  */
 public final class RepositoryFactory {
@@ -65,5 +65,9 @@ public final class RepositoryFactory {
 
 					}
 				}));
+	}
+	
+	public static void destroy() {
+		repositoryCache.invalidateAll();
 	}
 }
