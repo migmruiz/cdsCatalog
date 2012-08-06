@@ -103,8 +103,9 @@ public class MySQLDiscRepository implements Repository<Disc> {
 			if (disc.isTransient()) {
 				id = Optional.of(insertDisc(disc));
 			} else {
+				id = Optional.of(disc.getId());
 				updateDisc(disc);
-				cache.invalidate(disc.getId());
+				cache.invalidate(id.get());
 			}
 		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);
@@ -175,12 +176,17 @@ public class MySQLDiscRepository implements Repository<Disc> {
 		insertDiscStmt.setString(1, disc.getName());
 		insertDiscStmt.setDate(2, new java.sql.Date(disc.getReleaseDate()
 				.getTime()));
-		insertDiscStmt.setLong(3, disc.getMainArtist().getId());
+		try {
+			insertDiscStmt.setLong(3, disc.getMainArtist().getId());
+		} catch (RepositoryException e) {
+			insertDiscStmt.setLong(3, -1L);
+		}
 		int rows = insertDiscStmt.executeUpdate();
 		try (ResultSet rs = insertDiscStmt.getGeneratedKeys()) {
 			ResultSetMetaData metaData = rs.getMetaData();
 			if (rows == 1 && metaData.getColumnCount() == 1) {
-				return rs.getLong(metaData.getColumnName(1));
+				rs.first();
+				return rs.getLong(1);
 			} else {
 				throw new SQLException("no rows affected");
 			}

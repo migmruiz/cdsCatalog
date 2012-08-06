@@ -39,10 +39,6 @@ public class TransientDisc implements Disc, IsWritable {
 	private final Repository<Artist> artistRepository;
 	private final Repository<Song> songRepository;
 
-	private List<Song> songs;
-	private Set<Artist> artists;
-	private Artist mainArtist;
-
 	/*
 	 * 
 	 */
@@ -111,17 +107,15 @@ public class TransientDisc implements Disc, IsWritable {
 	 */
 	@Override
 	public Iterable<Artist> getArtists() {
-		if (this.artists == null) {
-			artists = new HashSet<>();
-			for (Long artistId : this.artistsIds) {
-				try {
-					artists.add(this.artistRepository.getById(artistId));
-				} catch (RepositoryException e) {
-					e.printStackTrace();
-				}
+		Set<Artist> artists = new HashSet<>();
+		for (Long artistId : this.artistsIds) {
+			try {
+				artists.add(this.artistRepository.getById(artistId));
+			} catch (RepositoryException e) {
+				e.printStackTrace();
 			}
 		}
-		return this.artists;
+		return artists;
 	}
 
 	/*
@@ -131,19 +125,15 @@ public class TransientDisc implements Disc, IsWritable {
 	@Override
 	public Artist getMainArtist() throws RepositoryException,
 			ExecutionException {
-		if (this.mainArtist == null) {
-			mainArtist = this.artistRepository.getById(this.mainArtistId.get());
+		if (this.mainArtistId.isPresent()) {
+			return this.artistRepository.getById(this.mainArtistId.get());
+		} else {
+			throw new RepositoryException();
 		}
-		return this.mainArtist;
 	}
 
 	public void setMain(long artistId) {
-		if (artistsIds.contains(artistId)) {
-			this.mainArtistId = Optional.of(artistId);
-		} else {
-			throw new UnsupportedOperationException(
-					"artistId must be under artistsIds first");
-		}
+		this.mainArtistId = Optional.of(artistId);
 	}
 
 	/*
@@ -152,17 +142,16 @@ public class TransientDisc implements Disc, IsWritable {
 	 */
 	@Override
 	public Iterable<Song> getSongs() {
-		if (this.songs == null) {
-			songs = new ArrayList<>();
-			for (Long songId : this.songsIds) {
-				try {
-					songs.add(this.songRepository.getById(songId));
-				} catch (RepositoryException e) {
-					e.printStackTrace();
-				}
+		List<Song> songs = new ArrayList<>();
+		for (Long songId : this.songsIds) {
+			try {
+				songs.add(this.songRepository.getById(songId));
+			} catch (RepositoryException e) {
+				e.printStackTrace();
 			}
 		}
-		return this.songs;
+
+		return songs;
 	}
 
 	/*

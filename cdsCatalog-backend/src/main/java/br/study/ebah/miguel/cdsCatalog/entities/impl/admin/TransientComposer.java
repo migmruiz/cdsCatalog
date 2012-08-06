@@ -30,15 +30,14 @@ public class TransientComposer extends TransientArtist implements Composer {
 
 	private final Repository<Song> songRepository;
 
-	private Set<Song> knownComposedSongs;
-
 	/*
 	 * 
 	 */
-	public TransientComposer(Artist artist, RepositoryType repoType) throws ExecutionException {
+	public TransientComposer(Artist artist, RepositoryType repoType)
+			throws ExecutionException {
 		this(artist.getName(), artist.getBirthday(), repoType);
 	}
-	
+
 	/*
 	 * 
 	 */
@@ -58,7 +57,7 @@ public class TransientComposer extends TransientArtist implements Composer {
 		this.songRepository = RepositoryFactory.getRepository(Song.class,
 				repoType);
 	}
-	
+
 	/*
 	 * 
 	 * @see
@@ -66,14 +65,12 @@ public class TransientComposer extends TransientArtist implements Composer {
 	 */
 	@Override
 	public Iterable<Song> getKnownComposedSongs() {
-		if (this.knownComposedSongs == null) {
-			knownComposedSongs = new HashSet<>();
-			for (Long songId : this.knownComposedSongsIds) {
-				try {
-					knownComposedSongs.add(songRepository.getById(songId));
-				} catch (RepositoryException e) {
-					e.printStackTrace();
-				}
+		Set<Song> knownComposedSongs = new HashSet<>();
+		for (Long songId : this.knownComposedSongsIds) {
+			try {
+				knownComposedSongs.add(songRepository.getById(songId));
+			} catch (RepositoryException e) {
+				e.printStackTrace();
 			}
 		}
 		return knownComposedSongs;
@@ -82,13 +79,8 @@ public class TransientComposer extends TransientArtist implements Composer {
 	/*
 	 * 
 	 */
-	public void setMain(Long songId) {
-		if (super.knownSongsIds.contains(songId)) {
-			this.knownComposedSongsIds.add(songId);
-		} else {
-			throw new UnsupportedOperationException(
-					"songId must be under knownSongsIds first");
-		}
+	public void setComposed(Long songId) {
+		this.knownComposedSongsIds.add(songId);
 	}
 
 }

@@ -92,8 +92,9 @@ public class MySQLComposerRepository implements Repository<Composer> {
 				insertComposerStmt.setLong(1, id.get());
 				insertComposerStmt.executeUpdate();
 			} else {
+				id = Optional.of(composer.getId());
 				MySQLArtistRepository.updateArtist(composer);
-				cache.invalidate(composer.getId());
+				cache.invalidate(id.get());
 			}
 		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);

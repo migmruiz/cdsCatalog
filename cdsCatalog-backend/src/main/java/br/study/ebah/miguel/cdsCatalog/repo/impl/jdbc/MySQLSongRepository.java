@@ -108,8 +108,9 @@ public class MySQLSongRepository implements Repository<Song> {
 			if (song.isTransient()) {
 				id = Optional.of(insertSong(song));
 			} else {
+				id = Optional.of(song.getId());
 				updateSong(song);
-				cache.invalidate(song.getId());
+				cache.invalidate(id.get());
 			}
 		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);
@@ -189,12 +190,17 @@ public class MySQLSongRepository implements Repository<Song> {
 		insertDiscStmt.setString(1, song.getName());
 		insertDiscStmt.setDate(2, new java.sql.Date(song.getFirstReleaseDate()
 				.getTime()));
-		insertDiscStmt.setLong(3, song.getComposer().getId());
+		try {
+			insertDiscStmt.setLong(3, song.getComposer().getId());
+		} catch (RepositoryException e) {
+			insertDiscStmt.setLong(3, -1L);
+		}
 		int rows = insertDiscStmt.executeUpdate();
 		try (ResultSet rs = insertDiscStmt.getGeneratedKeys()) {
 			ResultSetMetaData metaData = rs.getMetaData();
 			if (rows == 1 && metaData.getColumnCount() == 1) {
-				return rs.getLong(metaData.getColumnName(1));
+				rs.first();
+				return rs.getLong(1);
 			} else {
 				throw new SQLException("no rows affected");
 			}

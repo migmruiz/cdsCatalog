@@ -97,6 +97,10 @@ public class MySQLArtistRepository implements Repository<Artist> {
 	}
 
 	@Override
+	public void initialize() {
+	}
+	
+	@Override
 	public Artist getById(@Nonnull final Long id) throws RepositoryException {
 		try {
 			return cache.get(id, new Callable<Artist>() {
@@ -127,8 +131,9 @@ public class MySQLArtistRepository implements Repository<Artist> {
 			if (artist.isTransient()) {
 				id = Optional.of(insertArtist(artist));
 			} else {
+				id = Optional.of(artist.getId());
 				updateArtist(artist);
-				cache.invalidate(artist.getId());
+				cache.invalidate(id.get());
 			}
 		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);
@@ -235,7 +240,8 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		try (ResultSet rs = insertArtistStmt.getGeneratedKeys()) {
 			ResultSetMetaData metaData = rs.getMetaData();
 			if (rows == 1 && metaData.getColumnCount() == 1) {
-				return rs.getLong(metaData.getColumnName(1));
+				rs.first();
+				return rs.getLong(1);
 			} else {
 				throw new SQLException("no rows affected");
 			}
@@ -323,10 +329,6 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		workingOnDiscsStmt.close();
 		idStmt.close();
 		con.close();
-	}
-
-	@Override
-	public void initialize() {
 	}
 
 }

@@ -38,10 +38,6 @@ public class TransientSong implements Song, IsWritable {
 	private final Repository<Composer> composerRepository;
 	private final Repository<Disc> discRepository;
 
-	private Set<Disc> knownDiscs;
-	private Set<Artist> knownArtists;
-	private Composer composer;
-
 	/*
 	 * 
 	 */
@@ -110,17 +106,15 @@ public class TransientSong implements Song, IsWritable {
 	 */
 	@Override
 	public Iterable<Artist> getKnownArtists() {
-		if (this.knownArtists == null) {
-			knownArtists = new HashSet<>();
-			for (Long artistId : this.knownArtistsIds) {
-				try {
-					knownArtists.add(this.artistRepository.getById(artistId));
-				} catch (RepositoryException e) {
-					e.printStackTrace();
-				}
+		Set<Artist> knownArtists = new HashSet<>();
+		for (Long artistId : this.knownArtistsIds) {
+			try {
+				knownArtists.add(this.artistRepository.getById(artistId));
+			} catch (RepositoryException e) {
+				e.printStackTrace();
 			}
 		}
-		return this.knownArtists;
+		return knownArtists;
 	}
 
 	/*
@@ -129,10 +123,11 @@ public class TransientSong implements Song, IsWritable {
 	 */
 	@Override
 	public Composer getComposer() throws RepositoryException {
-		if (this.composer == null) {
-			composer = this.composerRepository.getById(this.composerId.get());
+		if (this.composerId.isPresent()) {
+			return this.composerRepository.getById(this.composerId.get());
+		} else {
+			throw new RepositoryException();
 		}
-		return this.composer;
 	}
 
 	public void setComposer(long composerId) {
@@ -175,17 +170,15 @@ public class TransientSong implements Song, IsWritable {
 	 */
 	@Override
 	public Iterable<Disc> getKnownDiscs() throws RepositoryException {
-		if (this.knownDiscs == null) {
-			knownDiscs = new HashSet<>();
-			for (Long discId : this.knownDiscsIds) {
-				try {
-					knownDiscs.add(this.discRepository.getById(discId));
-				} catch (RepositoryException e) {
-					e.printStackTrace();
-				}
+		Set<Disc> knownDiscs = new HashSet<>();
+		for (Long discId : this.knownDiscsIds) {
+			try {
+				knownDiscs.add(this.discRepository.getById(discId));
+			} catch (RepositoryException e) {
+				e.printStackTrace();
 			}
 		}
-		return this.knownDiscs;
+		return knownDiscs;
 	}
 
 	/*

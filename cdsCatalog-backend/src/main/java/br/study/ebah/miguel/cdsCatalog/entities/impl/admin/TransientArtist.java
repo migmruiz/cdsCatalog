@@ -39,10 +39,6 @@ public class TransientArtist implements Artist, IsWritable {
 	private final Repository<Song> songRepository;
 	private final Repository<Disc> discRepository;
 
-	private Set<Song> knownSongs;
-	private Set<Disc> knownDiscs;
-	private Set<Disc> knownMainDiscs;
-
 	/*
 	 * 
 	 */
@@ -158,17 +154,15 @@ public class TransientArtist implements Artist, IsWritable {
 	 */
 	@Override
 	public Iterable<Song> getKnownSongs() {
-		if (this.knownSongs == null) {
-			knownSongs = new HashSet<>();
-			for (Long songId : this.knownSongsIds) {
-				try {
-					knownSongs.add(this.songRepository.getById(songId));
-				} catch (RepositoryException e) {
-					e.printStackTrace();
-				}
+		Set<Song> knownSongs = new HashSet<>();
+		for (Long songId : this.knownSongsIds) {
+			try {
+				knownSongs.add(this.songRepository.getById(songId));
+			} catch (RepositoryException e) {
+				e.printStackTrace();
 			}
 		}
-		return this.knownSongs;
+		return knownSongs;
 	}
 
 	/*
@@ -177,17 +171,15 @@ public class TransientArtist implements Artist, IsWritable {
 	 */
 	@Override
 	public Iterable<Disc> getKnownDiscs() {
-		if (this.knownDiscs == null) {
-			knownDiscs = new HashSet<>();
-			for (Long discId : this.knownDiscsIds) {
-				try {
-					knownDiscs.add(this.discRepository.getById(discId));
-				} catch (RepositoryException e) {
-					e.printStackTrace();
-				}
+		Set<Disc> knownDiscs = new HashSet<>();
+		for (Long discId : this.knownDiscsIds) {
+			try {
+				knownDiscs.add(this.discRepository.getById(discId));
+			} catch (RepositoryException e) {
+				e.printStackTrace();
 			}
 		}
-		return this.knownDiscs;
+		return knownDiscs;
 	}
 
 	/*
@@ -196,29 +188,22 @@ public class TransientArtist implements Artist, IsWritable {
 	 */
 	@Override
 	public Iterable<Disc> getKnownMainDiscs() {
-		if (this.knownMainDiscs == null) {
-			knownMainDiscs = new HashSet<>();
-			for (Long discId : this.knownMainDiscsIds) {
-				try {
-					knownMainDiscs.add(this.discRepository.getById(discId));
-				} catch (RepositoryException e) {
-					e.printStackTrace();
-				}
+		Set<Disc> knownMainDiscs = new HashSet<>();
+		for (Long discId : this.knownMainDiscsIds) {
+			try {
+				knownMainDiscs.add(this.discRepository.getById(discId));
+			} catch (RepositoryException e) {
+				e.printStackTrace();
 			}
 		}
-		return this.knownMainDiscs;
+		return knownMainDiscs;
 	}
 
 	/*
 	 * 
 	 */
 	public void setMain(Long discId) {
-		if (this.knownDiscsIds.contains(discId)) {
-			this.knownMainDiscsIds.add(discId);
-		} else {
-			throw new UnsupportedOperationException(
-					"discId must be under knownDiscsIds first");
-		}
+		this.knownMainDiscsIds.add(discId);
 	}
 
 	/*
