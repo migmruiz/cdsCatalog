@@ -67,6 +67,7 @@ public class MySQLRepositoryTest {
 				new LocalDate(1969, 1, 14).toDate(), RepositoryType.MySQL);
 		Artist persistentArtist = artistRepository.save(transientArtist);
 		transientArtist.setId(persistentArtist.getId());
+		// TODO avoid the Artist duplicate
 
 		transientDisc.asWritable(Artist.class).add(transientArtist);
 		transientDisc.setMain(transientArtist.getId());
