@@ -15,8 +15,7 @@ import javax.annotation.Nonnull;
 import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentDisc;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientDisc;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.DiscImpl;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
@@ -82,8 +81,7 @@ public class MySQLDiscRepository implements Repository<Disc> {
 					Preconditions.checkNotNull(id, "id cannot be null");
 					Preconditions.checkState(!(con.isClosed()),
 							"cannot execute query if connection is closed");
-					Disc transientDisc = pullDisc(id);
-					Disc persistentDisc = new PersistentDisc(transientDisc);
+					Disc persistentDisc = pullDisc(id);
 					cache.put(id, persistentDisc);
 					return persistentDisc;
 				}
@@ -135,15 +133,15 @@ public class MySQLDiscRepository implements Repository<Disc> {
 				"cannot execute query if statement is closed");
 
 		idStmt.setLong(1, id.longValue());
-		TransientDisc disc;
+		DiscImpl disc;
 		try (ResultSet idRs = idStmt.executeQuery()) {
 			if (idRs.first()) {
 				java.sql.Date releaseDateSQL = idRs.getDate("releaseDate");
 				if (releaseDateSQL == null) {
-					disc = new TransientDisc(idRs.getString("name"),
+					disc = new DiscImpl(idRs.getString("name"),
 							RepositoryType.MySQL);
 				} else {
-					disc = new TransientDisc(idRs.getString("name"), new Date(
+					disc = new DiscImpl(idRs.getString("name"), new Date(
 							releaseDateSQL.getTime()), RepositoryType.MySQL);
 				}
 

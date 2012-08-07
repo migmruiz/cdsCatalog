@@ -28,8 +28,7 @@ import com.google.common.base.Optional;
  * @author miguel
  * 
  */
-public class TransientDisc implements Disc, IsWritable {
-	private Optional<Long> id = Optional.absent();
+public class DiscImpl extends AbstractEntity implements Disc, IsWritable {
 	private final String name;
 	private final List<Long> songsIds;
 	private final Set<Long> artistsIds;
@@ -42,7 +41,7 @@ public class TransientDisc implements Disc, IsWritable {
 	/*
 	 * 
 	 */
-	public TransientDisc(String name, RepositoryType repoType)
+	public DiscImpl(String name, RepositoryType repoType)
 			throws ExecutionException {
 		this(name, null, repoType);
 	}
@@ -50,7 +49,7 @@ public class TransientDisc implements Disc, IsWritable {
 	/*
 	 * 
 	 */
-	public TransientDisc(String name, Date releaseDate, RepositoryType repoType)
+	public DiscImpl(String name, Date releaseDate, RepositoryType repoType)
 			throws ExecutionException {
 		this.name = name;
 
@@ -63,33 +62,6 @@ public class TransientDisc implements Disc, IsWritable {
 				repoType);
 
 		this.releaseDate = releaseDate;
-	}
-
-	/*
-	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
-	 */
-	@Override
-	public Long getId() {
-		return id.get();
-	}
-
-	/**
-	 * Admin access only
-	 * 
-	 * @param id
-	 */
-	public void setId(Long id) {
-		this.id = Optional.of(id);
-	}
-
-	/*
-	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
-	 */
-	@Override
-	public boolean isTransient() {
-		return true;
 	}
 
 	/*

@@ -18,8 +18,7 @@ import br.study.ebah.miguel.cdsCatalog.actions.Writable;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentArtist;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.ArtistImpl;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
@@ -109,9 +108,7 @@ public class MySQLArtistRepository implements Repository<Artist> {
 					Preconditions.checkNotNull(id, "id cannot be null");
 					Preconditions.checkState(!(con.isClosed()),
 							"cannot execute query if connection is closed");
-					Artist transientArtist = pullArtist(id);
-					Artist persistentArtist = new PersistentArtist(
-							transientArtist);
+					Artist persistentArtist = pullArtist(id);
 					cache.put(id, persistentArtist);
 					return persistentArtist;
 				}
@@ -165,15 +162,15 @@ public class MySQLArtistRepository implements Repository<Artist> {
 				"cannot execute query if statement is closed");
 
 		idStmt.setLong(1, id.longValue());
-		TransientArtist artist;
+		ArtistImpl artist;
 		try (ResultSet rs = idStmt.executeQuery()) {
 			if (rs.first()) {
 				java.sql.Date birthdaySQL = rs.getDate("birthday");
 				if (birthdaySQL == null) {
-					artist = new TransientArtist(rs.getString("name"),
+					artist = new ArtistImpl(rs.getString("name"),
 							RepositoryType.MySQL);
 				} else {
-					artist = new TransientArtist(rs.getString("name"),
+					artist = new ArtistImpl(rs.getString("name"),
 							new Date(birthdaySQL.getTime()),
 							RepositoryType.MySQL);
 				}

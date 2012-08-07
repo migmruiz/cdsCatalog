@@ -24,7 +24,7 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
  * @author miguel
  * 
  */
-public class TransientComposer extends TransientArtist implements Composer {
+public class ComposerImpl extends ArtistImpl implements Composer {
 
 	private final Set<Long> knownComposedSongsIds;
 
@@ -33,7 +33,7 @@ public class TransientComposer extends TransientArtist implements Composer {
 	/*
 	 * 
 	 */
-	public TransientComposer(Artist artist, RepositoryType repoType)
+	public ComposerImpl(Artist artist, RepositoryType repoType)
 			throws ExecutionException {
 		this(artist.getName(), artist.getBirthday(), repoType);
 	}
@@ -41,7 +41,7 @@ public class TransientComposer extends TransientArtist implements Composer {
 	/*
 	 * 
 	 */
-	public TransientComposer(@Nonnull String name, RepositoryType repoType)
+	public ComposerImpl(@Nonnull String name, RepositoryType repoType)
 			throws ExecutionException {
 		this(name, null, repoType);
 	}
@@ -49,7 +49,7 @@ public class TransientComposer extends TransientArtist implements Composer {
 	/*
 	 * 
 	 */
-	public TransientComposer(@Nonnull String name, @Nullable Date birthday,
+	public ComposerImpl(@Nonnull String name, @Nullable Date birthday,
 			RepositoryType repoType) throws ExecutionException {
 		super(name, birthday, repoType);
 		this.knownComposedSongsIds = new ConcurrentSkipListSet<Long>();

@@ -27,7 +27,7 @@
 		<p>The following CDs are available:</p>
 		<ul>
 			<c:forEach var="cdsWithArtists" items="${cdsWithArtistsContainer}">
-				<%-- cdsWithArtists.value is a list of cds' titles--%>
+				<%-- cdsWithArtists.key is a list of cds' titles--%>
 				<li>${cdsWithArtists.key}
 					<ul>
 						<%-- cdsWithArtists.value is a list of the artist's cds --%>

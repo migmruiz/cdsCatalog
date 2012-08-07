@@ -12,8 +12,7 @@ import javax.annotation.Nonnull;
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Composer;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentComposer;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientComposer;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.ComposerImpl;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
@@ -67,9 +66,7 @@ public class MySQLComposerRepository implements Repository<Composer> {
 					Preconditions.checkNotNull(id, "id cannot be null");
 					Preconditions.checkState(!(con.isClosed()),
 							"cannot execute query if connection is closed");
-					Composer transientComposer = pullComposer(id);
-					Composer persistentComposer = new PersistentComposer(
-							transientComposer);
+					Composer persistentComposer = pullComposer(id);
 					cache.put(id, persistentComposer);
 					return persistentComposer;
 				}
@@ -123,7 +120,7 @@ public class MySQLComposerRepository implements Repository<Composer> {
 		Preconditions.checkState(!composedSongStmt.isClosed(),
 				"cannot execute query if statement is closed");
 		Artist tempArtist = MySQLArtistRepository.pullArtist(id);
-		TransientComposer composer = new TransientComposer(tempArtist,
+		ComposerImpl composer = new ComposerImpl(tempArtist,
 				RepositoryType.MySQL);
 
 		try (ResultSet rs = composedSongStmt.executeQuery()) {

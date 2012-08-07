@@ -22,14 +22,11 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 
-import com.google.common.base.Optional;
-
 /**
  * @author miguel
  * 
  */
-public class TransientArtist implements Artist, IsWritable {
-	private Optional<Long> id = Optional.absent();
+public class ArtistImpl extends AbstractEntity implements Artist, IsWritable {
 	private final String name;
 	final Set<Long> knownSongsIds;
 	private final Set<Long> knownDiscsIds;
@@ -42,7 +39,7 @@ public class TransientArtist implements Artist, IsWritable {
 	/*
 	 * 
 	 */
-	public TransientArtist(@Nonnull String name, RepositoryType repoType)
+	public ArtistImpl(@Nonnull String name, RepositoryType repoType)
 			throws ExecutionException {
 		this(name, null, repoType);
 	}
@@ -50,7 +47,7 @@ public class TransientArtist implements Artist, IsWritable {
 	/*
 	 * 
 	 */
-	public TransientArtist(@Nonnull String name, @Nullable Date birthday,
+	public ArtistImpl(@Nonnull String name, @Nullable Date birthday,
 			RepositoryType repoType) throws ExecutionException {
 		this.name = name;
 
@@ -65,24 +62,6 @@ public class TransientArtist implements Artist, IsWritable {
 
 		this.birthday = birthday;
 
-	}
-
-	/*
-	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
-	 */
-	@Override
-	public Long getId() {
-		return id.or(-1L);
-	}
-
-	/**
-	 * Admin access only
-	 * 
-	 * @param id
-	 */
-	public void setId(Long id) {
-		this.id = Optional.of(id);
 	}
 
 	/*
@@ -128,15 +107,6 @@ public class TransientArtist implements Artist, IsWritable {
 		} else {
 			throw new IllegalArgumentException();
 		}
-	}
-
-	/*
-	 * 
-	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
-	 */
-	@Override
-	public boolean isTransient() {
-		return true;
 	}
 
 	/*

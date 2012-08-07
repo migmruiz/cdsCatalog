@@ -13,8 +13,8 @@ import org.junit.Test;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientDisc;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.ArtistImpl;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.DiscImpl;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
@@ -38,19 +38,19 @@ public class InMemoryRepositoryTest {
 
 	@Test @Before
 	public void saveTest() throws Exception {
-		TransientArtist transientArtist = new TransientArtist("Dave Grohl",
+		ArtistImpl transientArtist = new ArtistImpl("Dave Grohl",
 				new LocalDate(1969, 1, 14).toDate(), RepositoryType.InMemory);
+		transientArtist.setId(1L); 
 
-		TransientDisc transientDisc = new TransientDisc("Nevermind",
+		DiscImpl transientDisc = new DiscImpl("Nevermind",
 				new LocalDate(1991, 9, 24).toDate(), RepositoryType.InMemory);
-
 		transientDisc.setId(1L); 
+
 		transientDisc.asWritable(Artist.class).add(transientArtist);
 		transientDisc.setMain(transientArtist.getId());
 		
 		discRepository.save(transientDisc);
 		
-		transientArtist.setId(1L); 
 		transientArtist.asWritable(Disc.class).add(transientDisc);
 		transientArtist.setMain(transientDisc.getId());
 

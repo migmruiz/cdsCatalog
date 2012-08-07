@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Entity;
-import br.study.ebah.miguel.cdsCatalog.repo.Persistence;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.AbstractEntity;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
@@ -17,6 +17,7 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
  */
 public class InMemoryRepository<T extends Entity> implements Repository<T> {
 	private final Map<Long, T> map = new ConcurrentHashMap<>();
+	private long elementCount = 0;
 
 	@Override
 	public void initialize() {
@@ -36,14 +37,11 @@ public class InMemoryRepository<T extends Entity> implements Repository<T> {
 	@Override
 	public T save(@Nonnull final T entity) throws RepositoryException {
 		try {
-			T persistentEntity;
 			if (entity.isTransient()) {
-				persistentEntity = (new Persistence<T>(entity)).entity();
-			} else {
-				persistentEntity = entity;
+				((AbstractEntity) entity).setId(++elementCount);
 			}
-			map.put(persistentEntity.getId(), entity);
-			return persistentEntity;
+			map.put(entity.getId(), entity);
+			return entity;
 		} catch (Exception e) {
 			throw new RepositoryException(e);
 		}

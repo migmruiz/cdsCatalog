@@ -12,10 +12,8 @@ import org.junit.Test;
 
 import br.study.ebah.miguel.cdsCatalog.entities.Artist;
 import br.study.ebah.miguel.cdsCatalog.entities.Disc;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentArtist;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.PersistentDisc;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientArtist;
-import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.TransientDisc;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.ArtistImpl;
+import br.study.ebah.miguel.cdsCatalog.entities.impl.admin.DiscImpl;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryFactory;
@@ -57,13 +55,13 @@ public class MySQLRepositoryTest {
 	public void saveTest() throws Exception {
 		Repository<Artist> artistRepository = RepositoryFactory.getRepository(
 				Artist.class, RepositoryType.MySQL);
-		
-		TransientDisc transientDisc = new TransientDisc("Nevermind",
-				new LocalDate(1991, 9, 24).toDate(), RepositoryType.MySQL);
+
+		DiscImpl transientDisc = new DiscImpl("Nevermind", new LocalDate(1991,
+				9, 24).toDate(), RepositoryType.MySQL);
 		Disc persistentDisc = discRepository.save(transientDisc);
 		transientDisc.setId(persistentDisc.getId());
-		
-		TransientArtist transientArtist = new TransientArtist("Dave Grohl",
+
+		ArtistImpl transientArtist = new ArtistImpl("Dave Grohl",
 				new LocalDate(1969, 1, 14).toDate(), RepositoryType.MySQL);
 		Artist persistentArtist = artistRepository.save(transientArtist);
 		transientArtist.setId(persistentArtist.getId());
@@ -72,15 +70,12 @@ public class MySQLRepositoryTest {
 		transientDisc.asWritable(Artist.class).add(transientArtist);
 		transientDisc.setMain(transientArtist.getId());
 
-		persistentDisc = new PersistentDisc(transientDisc);
-
-		discRepository.save(persistentDisc);
+		persistentDisc = discRepository.save(transientDisc);
 
 		transientArtist.asWritable(Disc.class).add(persistentDisc);
 		transientArtist.setMain(persistentDisc.getId());
 
-		persistentArtist = artistRepository.save(new PersistentArtist(
-				transientArtist));
+		persistentArtist = artistRepository.save(transientArtist);
 	}
 
 	@Test
