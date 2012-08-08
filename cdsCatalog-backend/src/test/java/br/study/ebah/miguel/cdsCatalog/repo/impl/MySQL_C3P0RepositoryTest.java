@@ -23,7 +23,7 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
  * @author miguel
  * 
  */
-public class MySQLRepositoryTest {
+public class MySQL_C3P0RepositoryTest {
 
 	private static Disc disc;
 	private static Repository<Disc> discRepository;
@@ -54,15 +54,15 @@ public class MySQLRepositoryTest {
 	@Test
 	public void saveTest() throws Exception {
 		Repository<Artist> artistRepository = RepositoryFactory.getRepository(
-				Artist.class, RepositoryType.MySQL);
+				Artist.class, RepositoryType.MySQL_C3P0);
 
 		DiscImpl transientDisc = new DiscImpl("Nevermind", new LocalDate(1991,
-				9, 24).toDate(), RepositoryType.MySQL);
+				9, 24).toDate(), RepositoryType.MySQL_C3P0);
 		Disc persistentDisc = discRepository.save(transientDisc);
 		transientDisc.setId(persistentDisc.getId());
 
 		ArtistImpl transientArtist = new ArtistImpl("Dave Grohl",
-				new LocalDate(1969, 1, 14).toDate(), RepositoryType.MySQL);
+				new LocalDate(1969, 1, 14).toDate(), RepositoryType.MySQL_C3P0);
 		Artist persistentArtist = artistRepository.save(transientArtist);
 		transientArtist.setId(persistentArtist.getId());
 		// TODO avoid the Artist duplicate

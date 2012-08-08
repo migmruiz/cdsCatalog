@@ -10,6 +10,10 @@ import br.study.ebah.miguel.cdsCatalog.entities.Entity;
 import br.study.ebah.miguel.cdsCatalog.entities.Song;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.HibernateRepository;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.InMemoryRepository;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.c3p0.MySQL_C3P0ArtistRepository;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.c3p0.MySQL_C3P0ComposerRepository;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.c3p0.MySQL_C3P0DiscRepository;
+import br.study.ebah.miguel.cdsCatalog.repo.impl.c3p0.MySQL_C3P0SongRepository;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc.MySQLArtistRepository;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc.MySQLComposerRepository;
 import br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc.MySQLDiscRepository;
@@ -56,6 +60,21 @@ public final class RepositoryFactory {
 							}
 						case Hibernate:
 							return new HibernateRepository<T>(t);
+							
+						case MySQL_C3P0:
+							if (t == Artist.class) {
+								return (Repository<T>) new MySQL_C3P0ArtistRepository();
+							} else if (t == Composer.class) {
+								return (Repository<T>) new MySQL_C3P0ComposerRepository();
+							} else if (t == Disc.class) {
+								return (Repository<T>) new MySQL_C3P0DiscRepository();
+							} else if (t == Song.class) {
+								return (Repository<T>) new MySQL_C3P0SongRepository();
+							} else {
+								throw new AssertionError(
+										"Repository is not set for this entity"
+												+ " of MySQL RepositoryType");
+							}
 
 						default:
 							throw new AssertionError(
