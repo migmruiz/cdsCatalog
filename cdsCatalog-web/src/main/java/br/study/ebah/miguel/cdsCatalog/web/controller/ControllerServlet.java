@@ -30,6 +30,7 @@ public class ControllerServlet extends HttpServlet {
 	private static final LocalDate creationDate = new LocalDate(2012, 7, 24);
 	private static final LocalDate lastModifiedDate = new LocalDate(2012, 8, 6);
 	private static final int expiresTimeInDays = 90;
+	private static final RepositoryType repoType = RepositoryType.Hibernate;
 
 	@Override
 	public void service(HttpServletRequest request, HttpServletResponse response)
@@ -53,13 +54,13 @@ public class ControllerServlet extends HttpServlet {
 		request.setAttribute("date", creationDateStr);
 
 		try (Repository<Artist> artistRepository = RepositoryFactory
-				.getRepository(Artist.class, RepositoryType.Hibernate);
+				.getRepository(Artist.class, repoType);
 				Repository<Composer> composerRepository = RepositoryFactory
-						.getRepository(Composer.class, RepositoryType.Hibernate);
+						.getRepository(Composer.class, repoType);
 				Repository<Disc> discRepository = RepositoryFactory
-						.getRepository(Disc.class, RepositoryType.Hibernate);
+						.getRepository(Disc.class, repoType);
 				Repository<Song> songRepository = RepositoryFactory
-						.getRepository(Song.class, RepositoryType.Hibernate)) {
+						.getRepository(Song.class, repoType)) {
 			artistRepository.initialize();
 			composerRepository.initialize();
 			discRepository.initialize();
