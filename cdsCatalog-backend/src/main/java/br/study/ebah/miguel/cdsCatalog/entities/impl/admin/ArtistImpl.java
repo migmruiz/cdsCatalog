@@ -28,9 +28,11 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
  */
 public class ArtistImpl extends AbstractEntity implements Artist, IsWritable {
 	private final String name;
-	final Set<Long> knownSongsIds;
-	private final Set<Long> knownDiscsIds;
-	private final Set<Long> knownMainDiscsIds;
+
+	private final Set<Long> knownSongsIds = new ConcurrentSkipListSet<Long>();
+	private final Set<Long> knownDiscsIds = new ConcurrentSkipListSet<Long>();
+	private final Set<Long> knownMainDiscsIds = new ConcurrentSkipListSet<Long>();
+
 	private final Date birthday;
 
 	private final Repository<Song> songRepository;
@@ -50,10 +52,6 @@ public class ArtistImpl extends AbstractEntity implements Artist, IsWritable {
 	public ArtistImpl(@Nonnull String name, @Nullable Date birthday,
 			RepositoryType repoType) throws ExecutionException {
 		this.name = name;
-
-		this.knownSongsIds = new ConcurrentSkipListSet<Long>();
-		this.knownDiscsIds = new ConcurrentSkipListSet<Long>();
-		this.knownMainDiscsIds = new ConcurrentSkipListSet<Long>();
 
 		this.discRepository = RepositoryFactory.getRepository(Disc.class,
 				repoType);

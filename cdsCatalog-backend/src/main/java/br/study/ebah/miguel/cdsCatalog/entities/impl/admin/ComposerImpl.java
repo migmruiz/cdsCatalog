@@ -26,7 +26,7 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
  */
 public class ComposerImpl extends ArtistImpl implements Composer {
 
-	private final Set<Long> knownComposedSongsIds;
+	private final Set<Long> knownComposedSongsIds = new ConcurrentSkipListSet<Long>();
 
 	private final Repository<Song> songRepository;
 
@@ -52,7 +52,6 @@ public class ComposerImpl extends ArtistImpl implements Composer {
 	public ComposerImpl(@Nonnull String name, @Nullable Date birthday,
 			RepositoryType repoType) throws ExecutionException {
 		super(name, birthday, repoType);
-		this.knownComposedSongsIds = new ConcurrentSkipListSet<Long>();
 
 		this.songRepository = RepositoryFactory.getRepository(Song.class,
 				repoType);

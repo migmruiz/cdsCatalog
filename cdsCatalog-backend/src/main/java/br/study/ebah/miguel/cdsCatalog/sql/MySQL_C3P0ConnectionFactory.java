@@ -14,16 +14,32 @@ import com.mchange.v2.c3p0.DataSources;
  * @author miguel
  * 
  */
-public class MySQL_C3P0ConnectionFactory {
-	private final DataSource ds_pooled;
+public class MySQL_C3P0ConnectionFactory implements ConnectionFactory {
 
-	/**
-	 * Default constructor
-	 * 
-	 * @throws SQLException
-	 * @throws ClassNotFoundException
-	 */
-	public MySQL_C3P0ConnectionFactory() throws SQLException, ClassNotFoundException {
+	private DataSource ds_pooled;
+
+	private MySQL_C3P0ConnectionFactory() {
+	}
+
+	private static class SingletonHolder {
+
+		private static final MySQL_C3P0ConnectionFactory instance;
+
+		static {
+			try {
+				instance = new MySQL_C3P0ConnectionFactory();
+				instance.initialize();
+			} catch (Throwable e) {
+				throw new Error(e);
+			}
+		}
+	}
+
+	public static ConnectionFactory getInstance() {
+		return SingletonHolder.instance;
+	}
+
+	private void initialize() throws SQLException, ClassNotFoundException {
 		Class.forName("com.mysql.jdbc.Driver");
 		DataSource ds_unpooled = DataSources.unpooledDataSource(
 				"jdbc:mysql://localhost/cdsCatalog", "logmanager",

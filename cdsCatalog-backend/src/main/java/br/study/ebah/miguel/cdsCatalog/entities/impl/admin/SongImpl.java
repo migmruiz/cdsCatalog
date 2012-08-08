@@ -28,8 +28,10 @@ import com.google.common.base.Optional;
  */
 public class SongImpl extends AbstractEntity implements Song, IsWritable {
 	private final String name;
-	private final Set<Long> knownDiscsIds;
-	private final Set<Long> knownArtistsIds;
+	
+	private final Set<Long> knownDiscsIds = new ConcurrentSkipListSet<Long>();
+	private final Set<Long> knownArtistsIds = new ConcurrentSkipListSet<Long>();
+	
 	private Optional<Long> composerId = Optional.absent();
 	private final Date firstReleaseDate;
 
@@ -51,9 +53,6 @@ public class SongImpl extends AbstractEntity implements Song, IsWritable {
 	public SongImpl(String name, Date releaseDate, RepositoryType repoType)
 			throws ExecutionException {
 		this.name = name;
-
-		this.knownDiscsIds = new ConcurrentSkipListSet<Long>();
-		this.knownArtistsIds = new ConcurrentSkipListSet<Long>();
 
 		this.artistRepository = RepositoryFactory.getRepository(Artist.class,
 				repoType);

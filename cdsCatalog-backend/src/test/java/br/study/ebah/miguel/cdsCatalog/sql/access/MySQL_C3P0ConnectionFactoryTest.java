@@ -19,7 +19,7 @@ public class MySQL_C3P0ConnectionFactoryTest {
 
 	@Test
 	public void getConnectionTest() throws SQLException, ClassNotFoundException {
-		Assert.assertNotNull(new MySQL_C3P0ConnectionFactory().getConnection());
+		Assert.assertNotNull(MySQL_C3P0ConnectionFactory.getInstance().getConnection());
 	}
 
 }
