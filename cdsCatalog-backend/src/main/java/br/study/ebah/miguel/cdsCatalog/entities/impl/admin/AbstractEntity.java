@@ -22,7 +22,7 @@ public abstract class AbstractEntity implements Entity {
 	 * @param id
 	 */
 	public void setId(Long id) {
-		Preconditions.checkState(!isTransient(),
+		Preconditions.checkState(isTransient(),
 				"Cannot change id of non-transient entities.");
 		this.id = Optional.of(id);
 	}

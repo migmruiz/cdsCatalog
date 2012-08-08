@@ -5,8 +5,7 @@ package br.study.ebah.miguel.cdsCatalog.sql.access;
 
 import java.sql.SQLException;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import br.study.ebah.miguel.cdsCatalog.sql.MySQLConnectionFactory;
