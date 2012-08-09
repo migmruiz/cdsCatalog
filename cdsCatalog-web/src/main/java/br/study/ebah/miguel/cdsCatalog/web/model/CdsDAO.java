@@ -19,8 +19,12 @@ import br.study.ebah.miguel.cdsCatalog.entities.Disc;
 import br.study.ebah.miguel.cdsCatalog.repo.Repository;
 import br.study.ebah.miguel.cdsCatalog.repo.RepositoryException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CdsDAO {
 
+	final Logger logger = LoggerFactory.getLogger(CdsDAO.class);
 	private final Repository<Disc> discRepository;
 
 	public CdsDAO(@Nonnull final Repository<Disc> discRepository) {
@@ -41,9 +45,8 @@ public class CdsDAO {
 				try {
 					gotIt = discRepository.getById(i);
 					if (i > 1L) {
-						System.err
-								.println("dao FORCE limit: escaping main data"
-										+ " fetch loop");
+						logger.info("dao FORCE limit: escaping main data"
+								+ " fetch loop");
 						goOn = false;
 					}
 				} catch (RepositoryException e) {
@@ -51,11 +54,9 @@ public class CdsDAO {
 				} catch (ObjectNotFoundException e) {
 					goOn = false;
 					// TODO avoid ObjectNotFoundException, that is occurring
-					System.err
-							.println("dao on load "
-									+ e.getClass().getSimpleName()
-									+ " - cause : " + e.getCause()
-									+ " - entity : " + e.getEntityName());
+					logger.info("dao on load " + e.getClass().getSimpleName()
+							+ " - cause : " + e.getCause() + " - entity : "
+							+ e.getEntityName());
 				} finally {
 					if (goOn) {
 						discs.add(gotIt);
@@ -65,26 +66,26 @@ public class CdsDAO {
 		} finally {
 			try {
 				for (Disc disc : discs) {
-					System.err.println("dao on read flag 1");
+					logger.debug("dao on read flag 1");
 					List<Map<String, String>> authorLinks = Collections
 							.synchronizedList(new ArrayList<Map<String, String>>());
 
-					System.err.println("dao on read flag 1.1");
+					logger.trace("dao on read flag 1.1");
 					try {
 						cdsContainer.put(disc.getName(), authorLinks);
 					} catch (Exception e) {
-						System.err.println("dao on read error flag 1.2: "
+						logger.trace("dao on read error flag 1.2: "
 								+ e.getMessage());
 					}
-					System.err.println("dao on read flag 2");
+					logger.debug("dao on read flag 2");
 					for (Artist artist : disc.getArtists()) {
-						System.err.println("dao on read flag 3");
+						logger.debug("dao on read flag 3");
 						Map<String, String> cdLink = new ConcurrentHashMap<>();
 						cdLink.put("artist", artist.getName());
 						Artist mainArtist = disc.getMainArtist();
 						if (artist.equals(mainArtist)) {
 							cdLink.put("mainArtist", mainArtist.getName());
-							System.err.println("dao on read flag 4");
+							logger.debug("dao on read flag 4");
 						}
 						authorLinks.add(cdLink);
 					}
@@ -94,9 +95,9 @@ public class CdsDAO {
 				throw new ServletException(e);
 			} catch (ObjectNotFoundException e) {
 				// TODO avoid ObjectNotFoundException, that is occurring
-				System.err.println("dao on read "
-						+ e.getClass().getSimpleName() + " - cause : "
-						+ e.getCause() + " - entity : " + e.getEntityName());
+				logger.warn("dao on read " + e.getClass().getSimpleName()
+						+ " - cause : " + e.getCause() + " - entity : "
+						+ e.getEntityName());
 			}
 		}
 		return cdsContainer;
