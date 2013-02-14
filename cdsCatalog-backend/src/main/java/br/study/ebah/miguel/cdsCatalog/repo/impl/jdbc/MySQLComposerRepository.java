@@ -1,5 +1,6 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,13 +20,13 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 import br.study.ebah.miguel.cdsCatalog.sql.MySQLConnectionFactory;
 import br.study.ebah.miguel.cdsCatalog.sql.SQLDBNoDataException;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 public class MySQLComposerRepository implements Repository<Composer> {
-	private static final Cache<Long, Composer> cache;
+	private static final Cache<Long, Composer> cache = CacheBuilder
+			.newBuilder().build();
 
 	private static final Connection con;
 	private static final PreparedStatement insertComposerStmt;
@@ -34,7 +35,6 @@ public class MySQLComposerRepository implements Repository<Composer> {
 
 	static {
 		try {
-			cache = CacheBuilder.newBuilder().build();
 			try {
 				try {
 					connFact = new MySQLConnectionFactory();
@@ -58,6 +58,10 @@ public class MySQLComposerRepository implements Repository<Composer> {
 	}
 
 	@Override
+	public void initialize() {
+	}
+	
+	@Override
 	public Composer getById(@Nonnull final Long id) throws RepositoryException {
 		try {
 			return cache.get(id, new Callable<Composer>() {
@@ -66,7 +70,7 @@ public class MySQLComposerRepository implements Repository<Composer> {
 					Preconditions.checkNotNull(id, "id cannot be null");
 					Preconditions.checkState(!(con.isClosed()),
 							"cannot execute query if connection is closed");
-					Composer persistentComposer = pullComposer(id);
+					final Composer persistentComposer = pullComposer(id);
 					cache.put(id, persistentComposer);
 					return persistentComposer;
 				}
@@ -79,25 +83,25 @@ public class MySQLComposerRepository implements Repository<Composer> {
 	@Override
 	public Composer save(@Nonnull final Composer composer)
 			throws RepositoryException {
-		Optional<Long> id = Optional.absent();
+		final Long id;
 		try {
 			Preconditions.checkState(!(con.isClosed() || con.isReadOnly()),
 					"cannot execute query if connection is closed or"
 							+ " read-only");
 			if (composer.isTransient()) {
-				id = Optional.of(MySQLArtistRepository.insertArtist(composer));
-				insertComposerStmt.setLong(1, id.get());
+				id = MySQLArtistRepository.insertArtist(composer);
+				insertComposerStmt.setLong(1, id);
 				insertComposerStmt.executeUpdate();
 			} else {
-				id = Optional.of(composer.getId());
+				id = composer.getId();
 				MySQLArtistRepository.updateArtist(composer);
-				cache.invalidate(id.get());
+				cache.invalidate(id);
 			}
 		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);
 		}
 
-		return getById(id.get());
+		return getById(id);
 	}
 
 	@Override
@@ -119,13 +123,13 @@ public class MySQLComposerRepository implements Repository<Composer> {
 			throws SQLException, ExecutionException, SQLDBNoDataException {
 		Preconditions.checkState(!composedSongStmt.isClosed(),
 				"cannot execute query if statement is closed");
-		Artist tempArtist = MySQLArtistRepository.pullArtist(id);
-		ComposerImpl composer = new ComposerImpl(tempArtist,
+		final Artist tempArtist = MySQLArtistRepository.pullArtist(id);
+		final ComposerImpl composer = new ComposerImpl(tempArtist,
 				RepositoryType.MySQL);
 
-		try (ResultSet rs = composedSongStmt.executeQuery()) {
+		try (final ResultSet rs = composedSongStmt.executeQuery()) {
 			if (rs.first()) {
-				long song_id = rs.getLong("id_song");
+				final long song_id = rs.getLong("id_song");
 				if (song_id != 0L) {
 					composer.asWritable(Song.class).add(song_id);
 					composer.setMain(song_id);
@@ -138,16 +142,16 @@ public class MySQLComposerRepository implements Repository<Composer> {
 
 	/*
 	 * 
-	 * @see java.lang.AutoCloseable#close()
+	 * @see java.lang.Closeable#close()
 	 */
 	@Override
-	public void close() throws Exception {
-		insertComposerStmt.close();
-		con.close();
-	}
-
-	@Override
-	public void initialize() {
+	public void close() throws IOException {
+		try {
+			insertComposerStmt.close();
+			con.close();
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 
 }

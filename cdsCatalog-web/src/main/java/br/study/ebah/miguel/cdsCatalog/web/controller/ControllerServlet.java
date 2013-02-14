@@ -39,13 +39,13 @@ public class ControllerServlet extends HttpServlet {
 		response.setDateHeader("Expires", lastModifiedDate.toDate().getTime()
 				+ TimeUnit.DAYS.toMillis(expiresTimeInDays));
 
-		String title = "cdsCatalog";
-		String author = "Miguel Mendes Ruiz";
+		final String title = "cdsCatalog";
+		final String author = "Miguel Mendes Ruiz";
 
-		DateTimeFormatter dateTimeFormatter = DateTimeFormat
+		final DateTimeFormatter dateTimeFormatter = DateTimeFormat
 				.forPattern("yyyyMMdd");
 
-		String creationDateStr = creationDate.toString(dateTimeFormatter);
+		final String creationDateStr = creationDate.toString(dateTimeFormatter);
 
 		System.out.println(creationDateStr);
 
@@ -53,19 +53,19 @@ public class ControllerServlet extends HttpServlet {
 		request.setAttribute("author", author);
 		request.setAttribute("date", creationDateStr);
 
-		try (Repository<Artist> artistRepository = RepositoryFactory
+		try (final Repository<Artist> artistRepository = RepositoryFactory
 				.getRepository(Artist.class, repoType);
-				Repository<Composer> composerRepository = RepositoryFactory
+				final Repository<Composer> composerRepository = RepositoryFactory
 						.getRepository(Composer.class, repoType);
-				Repository<Disc> discRepository = RepositoryFactory
+				final Repository<Disc> discRepository = RepositoryFactory
 						.getRepository(Disc.class, repoType);
-				Repository<Song> songRepository = RepositoryFactory
+				final Repository<Song> songRepository = RepositoryFactory
 						.getRepository(Song.class, repoType)) {
 			artistRepository.initialize();
 			composerRepository.initialize();
 			discRepository.initialize();
 			songRepository.initialize();
-			CdsDAO cdsDAO = new CdsDAO(discRepository);
+			final CdsDAO cdsDAO = new CdsDAO(discRepository);
 
 			request.setAttribute("cdsWithArtistsContainer",
 					cdsDAO.getContainerWithArtists());

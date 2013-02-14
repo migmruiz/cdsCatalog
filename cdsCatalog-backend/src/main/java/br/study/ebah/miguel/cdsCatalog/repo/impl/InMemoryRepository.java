@@ -1,5 +1,6 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,10 +59,10 @@ public class InMemoryRepository<T extends Entity> implements Repository<T> {
 
 	/*
 	 * 
-	 * @see java.lang.AutoCloseable#close()
+	 * @see java.lang.Closeable#close()
 	 */
 	@Override
-	public void close() throws Exception {
+	public void close() throws IOException {
 		map.clear();
 	}
 }

@@ -1,5 +1,6 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,13 +23,13 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 import br.study.ebah.miguel.cdsCatalog.sql.MySQLConnectionFactory;
 import br.study.ebah.miguel.cdsCatalog.sql.SQLDBNoDataException;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 public class MySQLDiscRepository implements Repository<Disc> {
-	private static final Cache<Long, Disc> cache;
+	private static final Cache<Long, Disc> cache = CacheBuilder.newBuilder()
+			.build();
 
 	private static final Connection con;
 	private static final PreparedStatement idStmt;
@@ -40,7 +41,6 @@ public class MySQLDiscRepository implements Repository<Disc> {
 
 	static {
 		try {
-			cache = CacheBuilder.newBuilder().build();
 			try {
 				try {
 					connFact = new MySQLConnectionFactory();
@@ -73,6 +73,10 @@ public class MySQLDiscRepository implements Repository<Disc> {
 	}
 
 	@Override
+	public void initialize() {
+	}
+
+	@Override
 	public Disc getById(@Nonnull final Long id) throws RepositoryException {
 		try {
 			return cache.get(id, new Callable<Disc>() {
@@ -81,7 +85,7 @@ public class MySQLDiscRepository implements Repository<Disc> {
 					Preconditions.checkNotNull(id, "id cannot be null");
 					Preconditions.checkState(!(con.isClosed()),
 							"cannot execute query if connection is closed");
-					Disc persistentDisc = pullDisc(id);
+					final Disc persistentDisc = pullDisc(id);
 					cache.put(id, persistentDisc);
 					return persistentDisc;
 				}
@@ -93,23 +97,23 @@ public class MySQLDiscRepository implements Repository<Disc> {
 
 	@Override
 	public Disc save(@Nonnull final Disc disc) throws RepositoryException {
-		Optional<Long> id = Optional.absent();
+		final Long id;
 		try {
 			Preconditions
 					.checkState(!(con.isClosed() || con.isReadOnly()),
 							"cannot execute query if connection is closed or read-only");
 			if (disc.isTransient()) {
-				id = Optional.of(insertDisc(disc));
+				id = insertDisc(disc);
 			} else {
-				id = Optional.of(disc.getId());
+				id = disc.getId();
 				updateDisc(disc);
-				cache.invalidate(id.get());
+				cache.invalidate(id);
 			}
 		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);
 		}
 
-		return getById(id.get());
+		return getById(id);
 	}
 
 	@Override
@@ -133,10 +137,10 @@ public class MySQLDiscRepository implements Repository<Disc> {
 				"cannot execute query if statement is closed");
 
 		idStmt.setLong(1, id.longValue());
-		DiscImpl disc;
-		try (ResultSet idRs = idStmt.executeQuery()) {
+		final DiscImpl disc;
+		try (final ResultSet idRs = idStmt.executeQuery()) {
 			if (idRs.first()) {
-				java.sql.Date releaseDateSQL = idRs.getDate("releaseDate");
+				final java.sql.Date releaseDateSQL = idRs.getDate("releaseDate");
 				if (releaseDateSQL == null) {
 					disc = new DiscImpl(idRs.getString("name"),
 							RepositoryType.MySQL);
@@ -145,11 +149,11 @@ public class MySQLDiscRepository implements Repository<Disc> {
 							releaseDateSQL.getTime()), RepositoryType.MySQL);
 				}
 
-				Writable<Artist> artistWritableDisc = disc
+				final Writable<Artist> artistWritableDisc = disc
 						.asWritable(Artist.class);
 
 				workingOnDiscsStmt.setLong(1, id.longValue());
-				try (ResultSet woRs = workingOnDiscsStmt.executeQuery()) {
+				try (final ResultSet woRs = workingOnDiscsStmt.executeQuery()) {
 					while (woRs.next()) {
 						artistWritableDisc.add(woRs.getLong("id_artist"));
 					}
@@ -166,7 +170,7 @@ public class MySQLDiscRepository implements Repository<Disc> {
 		return disc;
 	}
 
-	private final static long insertDisc(@Nonnull Disc disc)
+	private final static long insertDisc(@Nonnull final Disc disc)
 			throws SQLException, RepositoryException, ExecutionException {
 		Preconditions.checkState(!(insertDiscStmt.isClosed()),
 				"cannot execute query if statement is closed");
@@ -179,9 +183,9 @@ public class MySQLDiscRepository implements Repository<Disc> {
 		} catch (RepositoryException e) {
 			insertDiscStmt.setLong(3, -1L);
 		}
-		int rows = insertDiscStmt.executeUpdate();
-		try (ResultSet rs = insertDiscStmt.getGeneratedKeys()) {
-			ResultSetMetaData metaData = rs.getMetaData();
+		final int rows = insertDiscStmt.executeUpdate();
+		try (final ResultSet rs = insertDiscStmt.getGeneratedKeys()) {
+			final ResultSetMetaData metaData = rs.getMetaData();
 			if (rows == 1 && metaData.getColumnCount() == 1) {
 				rs.first();
 				return rs.getLong(1);
@@ -192,7 +196,7 @@ public class MySQLDiscRepository implements Repository<Disc> {
 		// TODO update/insert into many-to-many tables
 	}
 
-	private final static void updateDisc(@Nonnull Disc disc)
+	private final static void updateDisc(@Nonnull final Disc disc)
 			throws SQLException, RepositoryException, ExecutionException {
 		Preconditions.checkState(!(updateDiscStmt.isClosed()),
 				"cannot execute query if statement is closed");
@@ -202,20 +206,20 @@ public class MySQLDiscRepository implements Repository<Disc> {
 				.getTime()));
 		updateDiscStmt.setLong(3, disc.getMainArtist().getId());
 		updateDiscStmt.setLong(4, disc.getId());
-		int rows = updateDiscStmt.executeUpdate();
+		final int rows = updateDiscStmt.executeUpdate();
 		if (rows != 1) {
 			throw new SQLException("no rows affected");
 		}
 		// TODO update many-to-many tables
 	}
 
-	private final static void deleteDisc(@Nonnull Disc disc)
+	private final static void deleteDisc(@Nonnull final Disc disc)
 			throws SQLException {
 		Preconditions.checkState(!(deleteDiscStmt.isClosed()),
 				"cannot execute query if statement is closed");
 
 		deleteDiscStmt.setLong(1, disc.getId());
-		int rows = deleteDiscStmt.executeUpdate();
+		final int rows = deleteDiscStmt.executeUpdate();
 		if (rows != 1) {
 			throw new SQLException("no rows affected");
 		}
@@ -224,20 +228,20 @@ public class MySQLDiscRepository implements Repository<Disc> {
 
 	/*
 	 * 
-	 * @see java.lang.AutoCloseable#close()
+	 * @see java.lang.Closeable#close()
 	 */
 	@Override
-	public void close() throws Exception {
-		insertDiscStmt.close();
-		updateDiscStmt.close();
-		deleteDiscStmt.close();
-		workingOnDiscsStmt.close();
-		idStmt.close();
-		con.close();
-	}
-
-	@Override
-	public void initialize() {
+	public void close() throws IOException {
+		try {
+			insertDiscStmt.close();
+			updateDiscStmt.close();
+			deleteDiscStmt.close();
+			workingOnDiscsStmt.close();
+			idStmt.close();
+			con.close();
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 
 }

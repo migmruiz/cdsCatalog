@@ -28,16 +28,14 @@ public class CdsDAO {
 	private final Repository<Disc> discRepository;
 
 	public CdsDAO(@Nonnull final Repository<Disc> discRepository) {
-
 		this.discRepository = discRepository;
-
 	}
 
 	public Map<String, List<Map<String, String>>> getContainerWithArtists()
 			throws ServletException {
-		Map<String, List<Map<String, String>>> cdsContainer = new ConcurrentHashMap<>();
+		final Map<String, List<Map<String, String>>> cdsContainer = new ConcurrentHashMap<>();
 
-		Set<Disc> discs = Collections.synchronizedSet(new HashSet<Disc>());
+		final Set<Disc> discs = Collections.synchronizedSet(new HashSet<Disc>());
 		boolean goOn = true;
 		try {
 			for (long i = 1L; goOn; i++) {
@@ -65,9 +63,9 @@ public class CdsDAO {
 			}
 		} finally {
 			try {
-				for (Disc disc : discs) {
+				for (final Disc disc : discs) {
 					logger.debug("dao on read flag 1");
-					List<Map<String, String>> authorLinks = Collections
+					final List<Map<String, String>> authorLinks = Collections
 							.synchronizedList(new ArrayList<Map<String, String>>());
 
 					logger.trace("dao on read flag 1.1");
@@ -78,11 +76,11 @@ public class CdsDAO {
 								+ e.getMessage());
 					}
 					logger.debug("dao on read flag 2");
-					for (Artist artist : disc.getArtists()) {
+					for (final Artist artist : disc.getArtists()) {
 						logger.debug("dao on read flag 3");
-						Map<String, String> cdLink = new ConcurrentHashMap<>();
+						final Map<String, String> cdLink = new ConcurrentHashMap<>();
 						cdLink.put("artist", artist.getName());
-						Artist mainArtist = disc.getMainArtist();
+						final Artist mainArtist = disc.getMainArtist();
 						if (artist.equals(mainArtist)) {
 							cdLink.put("mainArtist", mainArtist.getName());
 							logger.debug("dao on read flag 4");

@@ -1,5 +1,6 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,14 +24,14 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 import br.study.ebah.miguel.cdsCatalog.sql.MySQLConnectionFactory;
 import br.study.ebah.miguel.cdsCatalog.sql.SQLDBNoDataException;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 public class MySQLSongRepository implements Repository<Song> {
-	private static final Cache<Long, Song> cache;
-
+	private static final Cache<Long, Song> cache = CacheBuilder.newBuilder()
+			.build();
+	
 	private static final Connection con;
 	private static final PreparedStatement idStmt;
 	private static final PreparedStatement discContainsStmt;
@@ -42,7 +43,6 @@ public class MySQLSongRepository implements Repository<Song> {
 
 	static {
 		try {
-			cache = CacheBuilder.newBuilder().build();
 			try {
 				try {
 					connFact = new MySQLConnectionFactory();
@@ -78,6 +78,11 @@ public class MySQLSongRepository implements Repository<Song> {
 	}
 
 	@Override
+	public void initialize() {
+	}
+
+
+	@Override
 	public Song getById(@Nonnull final Long id) throws RepositoryException {
 		try {
 			return cache.get(id, new Callable<Song>() {
@@ -98,23 +103,23 @@ public class MySQLSongRepository implements Repository<Song> {
 
 	@Override
 	public Song save(@Nonnull final Song song) throws RepositoryException {
-		Optional<Long> id = Optional.absent();
+		final Long id;
 		try {
 			Preconditions
 					.checkState(!(con.isClosed() || con.isReadOnly()),
 							"cannot execute query if connection is closed or read-only");
 			if (song.isTransient()) {
-				id = Optional.of(insertSong(song));
+				id = insertSong(song);
 			} else {
-				id = Optional.of(song.getId());
+				id = song.getId();
 				updateSong(song);
-				cache.invalidate(id.get());
+				cache.invalidate(id);
 			}
 		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);
 		}
 
-		return getById(id.get());
+		return getById(id);
 	}
 
 	@Override
@@ -140,10 +145,10 @@ public class MySQLSongRepository implements Repository<Song> {
 						"cannot execute query if statement is closed");
 
 		idStmt.setLong(1, id.longValue());
-		SongImpl song;
-		try (ResultSet rs = idStmt.executeQuery()) {
+		final SongImpl song;
+		try (final ResultSet rs = idStmt.executeQuery()) {
 			if (rs.first()) {
-				java.sql.Date releaseDateSQL = rs.getDate("firstReleaseDate");
+				final java.sql.Date releaseDateSQL = rs.getDate("firstReleaseDate");
 				if (releaseDateSQL == null) {
 					song = new SongImpl(rs.getString("name"),
 							RepositoryType.MySQL);
@@ -157,19 +162,19 @@ public class MySQLSongRepository implements Repository<Song> {
 				throw new SQLDBNoDataException("no data on artist table");
 			}
 		}
-		Writable<Artist> artistWritableDisc = song.asWritable(Artist.class);
+		final Writable<Artist> artistWritableDisc = song.asWritable(Artist.class);
 
 		fromArtistStmt.setLong(1, id.longValue());
-		try (ResultSet rs = fromArtistStmt.executeQuery()) {
+		try (final ResultSet rs = fromArtistStmt.executeQuery()) {
 			while (rs.next()) {
 				artistWritableDisc.add(rs.getLong("id_artist"));
 			}
 		}
 
-		Writable<Disc> discWritableDisc = song.asWritable(Disc.class);
+		final Writable<Disc> discWritableDisc = song.asWritable(Disc.class);
 
 		discContainsStmt.setLong(1, id.longValue());
-		try (ResultSet rs = discContainsStmt.executeQuery()) {
+		try (final ResultSet rs = discContainsStmt.executeQuery()) {
 			while (rs.next()) {
 				discWritableDisc.add(rs.getLong("id_disc"));
 			}
@@ -180,7 +185,7 @@ public class MySQLSongRepository implements Repository<Song> {
 		return song;
 	}
 
-	private final static long insertSong(@Nonnull Song song)
+	private final static long insertSong(@Nonnull final Song song)
 			throws SQLException, RepositoryException, ExecutionException {
 		Preconditions.checkState(!(insertDiscStmt.isClosed()),
 				"cannot execute query if statement is closed");
@@ -193,9 +198,9 @@ public class MySQLSongRepository implements Repository<Song> {
 		} catch (RepositoryException e) {
 			insertDiscStmt.setLong(3, -1L);
 		}
-		int rows = insertDiscStmt.executeUpdate();
-		try (ResultSet rs = insertDiscStmt.getGeneratedKeys()) {
-			ResultSetMetaData metaData = rs.getMetaData();
+		final int rows = insertDiscStmt.executeUpdate();
+		try (final ResultSet rs = insertDiscStmt.getGeneratedKeys()) {
+			final ResultSetMetaData metaData = rs.getMetaData();
 			if (rows == 1 && metaData.getColumnCount() == 1) {
 				rs.first();
 				return rs.getLong(1);
@@ -206,7 +211,7 @@ public class MySQLSongRepository implements Repository<Song> {
 		// TODO update/insert into many-to-many tables
 	}
 
-	private final static void updateSong(@Nonnull Song song)
+	private final static void updateSong(@Nonnull final Song song)
 			throws SQLException, RepositoryException, ExecutionException {
 		Preconditions.checkState(!(updateDiscStmt.isClosed()),
 				"cannot execute query if statement is closed");
@@ -216,20 +221,20 @@ public class MySQLSongRepository implements Repository<Song> {
 				.getTime()));
 		updateDiscStmt.setLong(3, song.getComposer().getId());
 		updateDiscStmt.setLong(4, song.getId());
-		int rows = updateDiscStmt.executeUpdate();
+		final int rows = updateDiscStmt.executeUpdate();
 		if (rows != 1) {
 			throw new SQLException("no rows affected");
 		}
 		// TODO update many-to-many tables
 	}
 
-	private final static void deleteSong(@Nonnull Song song)
+	private final static void deleteSong(@Nonnull final Song song)
 			throws SQLException {
 		Preconditions.checkState(!(deleteDiscStmt.isClosed()),
 				"cannot execute query if statement is closed");
 
 		deleteDiscStmt.setLong(1, song.getId());
-		int rows = deleteDiscStmt.executeUpdate();
+		final int rows = deleteDiscStmt.executeUpdate();
 		if (rows != 1) {
 			throw new SQLException("no rows affected");
 		}
@@ -238,20 +243,19 @@ public class MySQLSongRepository implements Repository<Song> {
 
 	/*
 	 * 
-	 * @see java.lang.AutoCloseable#close()
+	 * @see java.lang.Closeable#close()
 	 */
 	@Override
-	public void close() throws Exception {
-		insertDiscStmt.close();
-		updateDiscStmt.close();
-		deleteDiscStmt.close();
-		discContainsStmt.close();
-		idStmt.close();
-		con.close();
+	public void close() throws IOException {
+		try {
+			insertDiscStmt.close();
+			updateDiscStmt.close();
+			deleteDiscStmt.close();
+			discContainsStmt.close();
+			idStmt.close();
+			con.close();
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
-
-	@Override
-	public void initialize() {
-	}
-
 }

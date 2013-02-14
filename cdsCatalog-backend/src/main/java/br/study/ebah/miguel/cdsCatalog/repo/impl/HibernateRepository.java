@@ -1,5 +1,6 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -126,10 +127,10 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 
 	/*
 	 * 
-	 * @see java.lang.AutoCloseable#close()
+	 * @see java.lang.Closeable#close()
 	 */
 	@Override
-	public void close() throws Exception {
+	public void close() throws IOException {
 		if (factory != null && !factory.isClosed()) {
 			factory.getCurrentSession().getTransaction().commit();
 			factory.close();

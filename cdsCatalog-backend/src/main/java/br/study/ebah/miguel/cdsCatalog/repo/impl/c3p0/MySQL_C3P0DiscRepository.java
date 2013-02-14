@@ -1,5 +1,6 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl.c3p0;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,17 +29,13 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 public class MySQL_C3P0DiscRepository implements Repository<Disc> {
-	private static final Cache<Long, Disc> cache;
-	private static final ConnectionFactory connFact;
+	private static final Cache<Long, Disc> cache = CacheBuilder.newBuilder()
+			.build();
+	private static final ConnectionFactory connFact = MySQL_C3P0ConnectionFactory
+			.getInstance();
 
-	static {
-		try {
-			cache = CacheBuilder.newBuilder().build();
-			connFact = MySQL_C3P0ConnectionFactory.getInstance();
-
-		} catch (Throwable t) {
-			throw new RuntimeException(t);
-		}
+	@Override
+	public void initialize() {
 	}
 
 	@Override
@@ -48,8 +45,8 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 				@Override
 				public Disc call() throws Exception {
 					Preconditions.checkNotNull(id, "id cannot be null");
-					try (Connection con = connFact.getConnection()) {
-						Disc persistentDisc = pullDisc(id, con);
+					try (final Connection con = connFact.getConnection()) {
+						final Disc persistentDisc = pullDisc(id, con);
 						cache.put(id, persistentDisc);
 						return persistentDisc;
 					}
@@ -63,7 +60,7 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 	@Override
 	public Disc save(@Nonnull final Disc disc) throws RepositoryException {
 
-		try (Connection con = connFact.getConnection()) {
+		try (final Connection con = connFact.getConnection()) {
 			final Long id;
 			if (disc.isTransient()) {
 				id = insertDisc(disc, con);
@@ -81,7 +78,7 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 	@Override
 	public void delete(@Nonnull final Disc disc) throws RepositoryException {
 		try {
-			try (Connection con = connFact.getConnection()) {
+			try (final Connection con = connFact.getConnection()) {
 				deleteDisc(disc, con);
 				cache.invalidate(disc.getId());
 			}
@@ -92,16 +89,17 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 
 	private final static Disc pullDisc(@Nonnull final Long id, Connection con)
 			throws SQLException, ExecutionException, SQLDBNoDataException {
-		try (PreparedStatement idStmt = con
+		try (final PreparedStatement idStmt = con
 				.prepareStatement("SELECT * FROM disc WHERE id_disc=?");
-				PreparedStatement workingOnDiscsStmt = con
+				final PreparedStatement workingOnDiscsStmt = con
 						.prepareStatement("SELECT * FROM `disc_artist-workingOn`"
 								+ " WHERE id_disc=?");) {
 			idStmt.setLong(1, id.longValue());
-			DiscImpl disc;
-			try (ResultSet idRs = idStmt.executeQuery()) {
+			final DiscImpl disc;
+			try (final ResultSet idRs = idStmt.executeQuery()) {
 				if (idRs.first()) {
-					java.sql.Date releaseDateSQL = idRs.getDate("releaseDate");
+					final java.sql.Date releaseDateSQL = idRs
+							.getDate("releaseDate");
 					if (releaseDateSQL == null) {
 						disc = new DiscImpl(idRs.getString("name"),
 								RepositoryType.MySQL);
@@ -110,11 +108,12 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 								releaseDateSQL.getTime()), RepositoryType.MySQL);
 					}
 
-					Writable<Artist> artistWritableDisc = disc
+					final Writable<Artist> artistWritableDisc = disc
 							.asWritable(Artist.class);
 
 					workingOnDiscsStmt.setLong(1, id.longValue());
-					try (ResultSet woRs = workingOnDiscsStmt.executeQuery()) {
+					try (final ResultSet woRs = workingOnDiscsStmt
+							.executeQuery()) {
 						while (woRs.next()) {
 							artistWritableDisc.add(woRs.getLong("id_artist"));
 						}
@@ -133,7 +132,7 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 
 	private final static long insertDisc(@Nonnull Disc disc, Connection con)
 			throws SQLException, RepositoryException, ExecutionException {
-		try (PreparedStatement insertDiscStmt = con.prepareStatement(
+		try (final PreparedStatement insertDiscStmt = con.prepareStatement(
 				"INSERT INTO disc (name,releaseDate,id_mainArtist)"
 						+ " VALUES (?,?,?);", Statement.RETURN_GENERATED_KEYS)) {
 
@@ -145,9 +144,9 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 			} catch (RepositoryException e) {
 				insertDiscStmt.setLong(3, -1L);
 			}
-			int rows = insertDiscStmt.executeUpdate();
-			try (ResultSet rs = insertDiscStmt.getGeneratedKeys()) {
-				ResultSetMetaData metaData = rs.getMetaData();
+			final int rows = insertDiscStmt.executeUpdate();
+			try (final ResultSet rs = insertDiscStmt.getGeneratedKeys()) {
+				final ResultSetMetaData metaData = rs.getMetaData();
 				if (rows == 1 && metaData.getColumnCount() == 1) {
 					rs.first();
 					return rs.getLong(1);
@@ -161,7 +160,7 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 
 	private final static void updateDisc(@Nonnull Disc disc, Connection con)
 			throws SQLException, RepositoryException, ExecutionException {
-		try (PreparedStatement updateDiscStmt = con
+		try (final PreparedStatement updateDiscStmt = con
 				.prepareStatement("UPDATE disc SET name=?, releaseDate=?,"
 						+ "id_mainArtist=? WHERE id_disc=?;")) {
 
@@ -170,7 +169,7 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 					.getTime()));
 			updateDiscStmt.setLong(3, disc.getMainArtist().getId());
 			updateDiscStmt.setLong(4, disc.getId());
-			int rows = updateDiscStmt.executeUpdate();
+			final int rows = updateDiscStmt.executeUpdate();
 			if (rows != 1) {
 				throw new SQLException("no rows affected");
 			}
@@ -180,11 +179,11 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 
 	private final static void deleteDisc(@Nonnull Disc disc, Connection con)
 			throws SQLException {
-		try (PreparedStatement deleteDiscStmt = con
+		try (final PreparedStatement deleteDiscStmt = con
 				.prepareStatement("DELETE FROM disc" + " WHERE id_disc=?;");) {
 
 			deleteDiscStmt.setLong(1, disc.getId());
-			int rows = deleteDiscStmt.executeUpdate();
+			final int rows = deleteDiscStmt.executeUpdate();
 			if (rows != 1) {
 				throw new SQLException("no rows affected");
 			}
@@ -194,15 +193,11 @@ public class MySQL_C3P0DiscRepository implements Repository<Disc> {
 
 	/*
 	 * 
-	 * @see java.lang.AutoCloseable#close()
+	 * @see java.lang.Closeable#close()
 	 */
 	@Override
-	public void close() throws Exception {
+	public void close() throws IOException {
 		cache.cleanUp();
-	}
-
-	@Override
-	public void initialize() {
 	}
 
 }

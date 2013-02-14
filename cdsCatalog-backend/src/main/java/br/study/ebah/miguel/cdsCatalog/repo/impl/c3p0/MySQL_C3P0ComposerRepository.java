@@ -1,5 +1,6 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl.c3p0;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,17 +26,13 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
 public class MySQL_C3P0ComposerRepository implements Repository<Composer> {
-	private static final Cache<Long, Composer> cache;
-	private static final ConnectionFactory connFact;
+	private static final Cache<Long, Composer> cache = CacheBuilder
+			.newBuilder().build();
+	private static final ConnectionFactory connFact = MySQL_C3P0ConnectionFactory
+			.getInstance();
 
-	static {
-		try {
-			cache = CacheBuilder.newBuilder().build();
-			connFact = MySQL_C3P0ConnectionFactory.getInstance();
-
-		} catch (Throwable t) {
-			throw new RuntimeException(t);
-		}
+	@Override
+	public void initialize() {
 	}
 
 	@Override
@@ -45,8 +42,9 @@ public class MySQL_C3P0ComposerRepository implements Repository<Composer> {
 				@Override
 				public Composer call() throws Exception {
 					Preconditions.checkNotNull(id, "id cannot be null");
-					try (Connection con = connFact.getConnection()) {
-						Composer persistentComposer = pullComposer(id, con);
+					try (final Connection con = connFact.getConnection()) {
+						final Composer persistentComposer = pullComposer(id,
+								con);
 						cache.put(id, persistentComposer);
 						return persistentComposer;
 					}
@@ -60,9 +58,9 @@ public class MySQL_C3P0ComposerRepository implements Repository<Composer> {
 	@Override
 	public Composer save(@Nonnull final Composer composer)
 			throws RepositoryException {
-		try (Connection con = connFact.getConnection()) {
+		try (final Connection con = connFact.getConnection()) {
 			final Long id;
-			try (PreparedStatement insertComposerStmt = con
+			try (final PreparedStatement insertComposerStmt = con
 					.prepareStatement("INSERT INTO composer id_composer"
 							+ " VALUE ?;")) {
 				if (composer.isTransient()) {
@@ -85,7 +83,7 @@ public class MySQL_C3P0ComposerRepository implements Repository<Composer> {
 	@Override
 	public void delete(@Nonnull final Composer artist)
 			throws RepositoryException {
-		try (Connection con = connFact.getConnection()) {
+		try (final Connection con = connFact.getConnection()) {
 			MySQL_C3P0ArtistRepository.deleteArtist(artist, con);
 			cache.invalidate(artist.getId());
 		} catch (SQLException e) {
@@ -96,15 +94,16 @@ public class MySQL_C3P0ComposerRepository implements Repository<Composer> {
 	private final Composer pullComposer(@Nonnull final Long id,
 			@Nonnull Connection con) throws SQLException, ExecutionException,
 			SQLDBNoDataException {
-		try (PreparedStatement composedSongStmt = con
+		try (final PreparedStatement composedSongStmt = con
 				.prepareStatement("SELECT * FROM song" + " WHERE id_composer=?")) {
-			Artist tempArtist = MySQL_C3P0ArtistRepository.pullArtist(id, con);
-			ComposerImpl composer = new ComposerImpl(tempArtist,
+			final Artist tempArtist = MySQL_C3P0ArtistRepository.pullArtist(id,
+					con);
+			final ComposerImpl composer = new ComposerImpl(tempArtist,
 					RepositoryType.MySQL);
 
-			try (ResultSet rs = composedSongStmt.executeQuery()) {
+			try (final ResultSet rs = composedSongStmt.executeQuery()) {
 				if (rs.first()) {
-					long song_id = rs.getLong("id_song");
+					final long song_id = rs.getLong("id_song");
 					if (song_id != 0L) {
 						composer.asWritable(Song.class).add(song_id);
 						composer.setMain(song_id);
@@ -117,15 +116,11 @@ public class MySQL_C3P0ComposerRepository implements Repository<Composer> {
 
 	/*
 	 * 
-	 * @see java.lang.AutoCloseable#close()
+	 * @see java.lang.Closeable#close()
 	 */
 	@Override
-	public void close() throws Exception {
+	public void close() throws IOException {
 		cache.cleanUp();
-	}
-
-	@Override
-	public void initialize() {
 	}
 
 }

@@ -1,5 +1,6 @@
 package br.study.ebah.miguel.cdsCatalog.repo.impl.jdbc;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,7 +26,6 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 import br.study.ebah.miguel.cdsCatalog.sql.MySQLConnectionFactory;
 import br.study.ebah.miguel.cdsCatalog.sql.SQLDBNoDataException;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -37,7 +37,8 @@ import com.google.common.cache.CacheBuilder;
 //e olhar o canônico ConnectionPool C3P0
 
 public class MySQLArtistRepository implements Repository<Artist> {
-	private static final Cache<Long, Artist> cache;
+	private static final Cache<Long, Artist> cache = CacheBuilder.newBuilder()
+			.build();
 
 	private static final Connection con;
 	private static final PreparedStatement idStmt;
@@ -53,7 +54,6 @@ public class MySQLArtistRepository implements Repository<Artist> {
 
 	static {
 		try {
-			cache = CacheBuilder.newBuilder().build();
 			try {
 				try {
 					connFact = new MySQLConnectionFactory();
@@ -108,7 +108,7 @@ public class MySQLArtistRepository implements Repository<Artist> {
 					Preconditions.checkNotNull(id, "id cannot be null");
 					Preconditions.checkState(!(con.isClosed()),
 							"cannot execute query if connection is closed");
-					Artist persistentArtist = pullArtist(id);
+					final Artist persistentArtist = pullArtist(id);
 					cache.put(id, persistentArtist);
 					return persistentArtist;
 				}
@@ -120,23 +120,23 @@ public class MySQLArtistRepository implements Repository<Artist> {
 
 	@Override
 	public Artist save(@Nonnull final Artist artist) throws RepositoryException {
-		Optional<Long> id = Optional.absent();
+		final Long id;
 		try {
 			Preconditions
 					.checkState(!(con.isClosed() || con.isReadOnly()),
 							"cannot execute query if connection is closed or read-only");
 			if (artist.isTransient()) {
-				id = Optional.of(insertArtist(artist));
+				id = insertArtist(artist);
 			} else {
-				id = Optional.of(artist.getId());
+				id = artist.getId();
 				updateArtist(artist);
-				cache.invalidate(id.get());
+				cache.invalidate(id);
 			}
 		} catch (SQLException | ExecutionException e) {
 			throw new RepositoryException(e);
 		}
 
-		return getById(id.get());
+		return getById(id);
 	}
 
 	@Override
@@ -162,10 +162,10 @@ public class MySQLArtistRepository implements Repository<Artist> {
 				"cannot execute query if statement is closed");
 
 		idStmt.setLong(1, id.longValue());
-		ArtistImpl artist;
-		try (ResultSet rs = idStmt.executeQuery()) {
+		final ArtistImpl artist;
+		try (final ResultSet rs = idStmt.executeQuery()) {
 			if (rs.first()) {
-				java.sql.Date birthdaySQL = rs.getDate("birthday");
+				final java.sql.Date birthdaySQL = rs.getDate("birthday");
 				if (birthdaySQL == null) {
 					artist = new ArtistImpl(rs.getString("name"),
 							RepositoryType.MySQL);
@@ -178,26 +178,26 @@ public class MySQLArtistRepository implements Repository<Artist> {
 			}
 		}
 
-		Writable<Disc> discWritableArtist = artist.asWritable(Disc.class);
+		final Writable<Disc> discWritableArtist = artist.asWritable(Disc.class);
 
 		workingOnDiscsStmt.setLong(1, id.longValue());
-		try (ResultSet rs = workingOnDiscsStmt.executeQuery()) {
+		try (final ResultSet rs = workingOnDiscsStmt.executeQuery()) {
 			while (rs.next()) {
 				discWritableArtist.add(rs.getLong("id_disc"));
 			}
 		}
 
 		mainDiscStmt.setLong(1, id.longValue());
-		try (ResultSet rs = mainDiscStmt.executeQuery()) {
+		try (final ResultSet rs = mainDiscStmt.executeQuery()) {
 			while (rs.next()) {
 				artist.setMain(rs.getLong("id_disc"));
 			}
 		}
 
-		Writable<Song> songWritableArtist = artist.asWritable(Song.class);
+		final Writable<Song> songWritableArtist = artist.asWritable(Song.class);
 
 		artistsSongStmt.setLong(1, id.longValue());
-		try (ResultSet rs = artistsSongStmt.executeQuery()) {
+		try (final ResultSet rs = artistsSongStmt.executeQuery()) {
 			while (rs.next()) {
 				songWritableArtist.add(rs.getLong("id_song"));
 			}
@@ -208,7 +208,7 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		return artist;
 	}
 
-	final static long insertArtist(@Nonnull Artist artist) throws SQLException,
+	final static long insertArtist(@Nonnull final Artist artist) throws SQLException,
 			RepositoryException, ExecutionException {
 		Preconditions
 				.checkState(
@@ -220,21 +220,21 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		insertArtistStmt.setString(1, artist.getName());
 		insertArtistStmt.setDate(2, new java.sql.Date(artist.getBirthday()
 				.getTime()));
-		int rows = insertArtistStmt.executeUpdate();
+		final int rows = insertArtistStmt.executeUpdate();
 
-		for (Disc disc : artist.getKnownDiscs()) {
+		for (final Disc disc : artist.getKnownDiscs()) {
 			insertWorkingOnStmt.setLong(1, disc.getId());
 			insertWorkingOnStmt.setLong(2, artist.getId());
 			insertWorkingOnStmt.executeUpdate();
 		}
-		for (Song song : artist.getKnownSongs()) {
+		for (final Song song : artist.getKnownSongs()) {
 			insertArtistSongStmt.setLong(1, artist.getId());
 			insertArtistSongStmt.setLong(2, song.getId());
 			insertArtistSongStmt.executeUpdate();
 		}
 
-		try (ResultSet rs = insertArtistStmt.getGeneratedKeys()) {
-			ResultSetMetaData metaData = rs.getMetaData();
+		try (final ResultSet rs = insertArtistStmt.getGeneratedKeys()) {
+			final ResultSetMetaData metaData = rs.getMetaData();
 			if (rows == 1 && metaData.getColumnCount() == 1) {
 				rs.first();
 				return rs.getLong(1);
@@ -244,7 +244,7 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		}
 	}
 
-	final static void updateArtist(@Nonnull Artist artist) throws SQLException,
+	final static void updateArtist(@Nonnull final Artist artist) throws SQLException,
 			RepositoryException, ExecutionException {
 		Preconditions.checkState(
 				!(updateArtistStmt.isClosed() || workingOnDiscsStmt.isClosed()
@@ -257,50 +257,50 @@ public class MySQLArtistRepository implements Repository<Artist> {
 		updateArtistStmt.setDate(2, new java.sql.Date(artist.getBirthday()
 				.getTime()));
 		updateArtistStmt.setLong(3, artist.getId());
-		int rows = updateArtistStmt.executeUpdate();
+		final int rows = updateArtistStmt.executeUpdate();
 		if (rows != 1) {
 			throw new SQLException("no rows affected");
 		}
 		// TODO update many-to-many tables
 
-		Set<Disc> knownDiscs = new HashSet<>();
-		for (Disc disc : artist.getKnownDiscs()) {
+		final Set<Disc> knownDiscs = new HashSet<>();
+		for (final Disc disc : artist.getKnownDiscs()) {
 			knownDiscs.add(disc);
 		}
 
 		workingOnDiscsStmt.setLong(1, artist.getId());
-		try (ResultSet rs = workingOnDiscsStmt.executeQuery()) {
+		try (final ResultSet rs = workingOnDiscsStmt.executeQuery()) {
 			while (rs.next()) {
 				knownDiscs.remove(rs.getLong("id_disc"));
 			}
 		}
 
-		for (Disc disc : knownDiscs) {
+		for (final Disc disc : knownDiscs) {
 			insertWorkingOnStmt.setLong(1, disc.getId());
 			insertWorkingOnStmt.setLong(2, artist.getId());
 			insertWorkingOnStmt.executeUpdate();
 		}
 
-		Set<Song> knownSongs = new HashSet<>();
-		for (Song song : artist.getKnownSongs()) {
+		final Set<Song> knownSongs = new HashSet<>();
+		for (final Song song : artist.getKnownSongs()) {
 			knownSongs.add(song);
 		}
 
 		artistsSongStmt.setLong(1, artist.getId());
-		try (ResultSet rs = artistsSongStmt.executeQuery()) {
+		try (final ResultSet rs = artistsSongStmt.executeQuery()) {
 			while (rs.next()) {
 				knownSongs.remove(rs.getLong("id_song"));
 			}
 		}
 
-		for (Song song : knownSongs) {
+		for (final Song song : knownSongs) {
 			insertArtistSongStmt.setLong(1, artist.getId());
 			insertArtistSongStmt.setLong(2, song.getId());
 			insertArtistSongStmt.executeUpdate();
 		}
 	}
 
-	final static void deleteArtist(@Nonnull Artist artist) throws SQLException {
+	final static void deleteArtist(@Nonnull final Artist artist) throws SQLException {
 		Preconditions.checkState(!(deleteArtistStmt.isClosed()),
 				"cannot execute query if statement is closed");
 
@@ -314,17 +314,21 @@ public class MySQLArtistRepository implements Repository<Artist> {
 
 	/*
 	 * 
-	 * @see java.lang.AutoCloseable#close()
+	 * @see java.lang.Closeable#close()
 	 */
 	@Override
-	public void close() throws Exception {
-		insertArtistStmt.close();
-		updateArtistStmt.close();
-		deleteArtistStmt.close();
-		mainDiscStmt.close();
-		workingOnDiscsStmt.close();
-		idStmt.close();
-		con.close();
+	public void close() throws IOException {
+		try {
+			insertArtistStmt.close();
+			updateArtistStmt.close();
+			deleteArtistStmt.close();
+			mainDiscStmt.close();
+			workingOnDiscsStmt.close();
+			idStmt.close();
+			con.close();
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 
 }

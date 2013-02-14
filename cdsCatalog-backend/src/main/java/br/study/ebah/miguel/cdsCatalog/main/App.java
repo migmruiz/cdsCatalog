@@ -14,9 +14,9 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 public class App {
 	public static void main(String[] args) {
 		try {
-			ArtistImpl artist = new ArtistImpl("Eu", new Date(),
+			final ArtistImpl artist = new ArtistImpl("Eu", new Date(),
 					RepositoryType.InMemory);
-			DiscImpl disc = new DiscImpl("", RepositoryType.InMemory);
+			final DiscImpl disc = new DiscImpl("", RepositoryType.InMemory);
 			disc.setId(1L);
 			System.out.println("Adding disc: " + disc);
 			artist.asWritable(Disc.class).add(disc);
