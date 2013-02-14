@@ -30,10 +30,11 @@ import com.google.common.base.Optional;
  */
 public class DiscImpl extends AbstractEntity implements Disc, IsWritable {
 	private final String name;
-	
-	private final List<Long> songsIds  = Collections.synchronizedList(new ArrayList<Long>());
-	private final Set<Long> artistsIds  = new ConcurrentSkipListSet<Long>();
-	
+
+	private final List<Long> songsIds = Collections
+			.synchronizedList(new ArrayList<Long>());
+	private final Set<Long> artistsIds = new ConcurrentSkipListSet<>();
+
 	private Optional<Long> mainArtistId = Optional.absent();
 	private final Date releaseDate;
 

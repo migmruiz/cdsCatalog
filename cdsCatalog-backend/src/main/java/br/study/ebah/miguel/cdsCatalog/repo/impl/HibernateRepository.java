@@ -70,7 +70,6 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 		;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public T getById(@Nonnull final Long id) throws RepositoryException {
 		try {
@@ -197,7 +196,7 @@ public class HibernateRepository<T extends Entity> implements Repository<T> {
 		se.create(true, true);
 	}
 
-//	public static void main(String[] args) {
-//		createTables();
-//	}
+	// public static void main(String[] args) {
+	// createTables();
+	// }
 }

@@ -47,6 +47,7 @@ public class MySQL_C3P0ConnectionFactory implements ConnectionFactory {
 		ds_pooled = DataSources.pooledDataSource(ds_unpooled);
 	}
 
+	@Override
 	public Connection getConnection() throws SQLException {
 		return ds_pooled.getConnection();
 	}

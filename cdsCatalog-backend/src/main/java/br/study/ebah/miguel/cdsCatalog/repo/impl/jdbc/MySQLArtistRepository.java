@@ -98,7 +98,7 @@ public class MySQLArtistRepository implements Repository<Artist> {
 	@Override
 	public void initialize() {
 	}
-	
+
 	@Override
 	public Artist getById(@Nonnull final Long id) throws RepositoryException {
 		try {
@@ -170,9 +170,8 @@ public class MySQLArtistRepository implements Repository<Artist> {
 					artist = new ArtistImpl(rs.getString("name"),
 							RepositoryType.MySQL);
 				} else {
-					artist = new ArtistImpl(rs.getString("name"),
-							new Date(birthdaySQL.getTime()),
-							RepositoryType.MySQL);
+					artist = new ArtistImpl(rs.getString("name"), new Date(
+							birthdaySQL.getTime()), RepositoryType.MySQL);
 				}
 			} else {
 				throw new SQLDBNoDataException("no data on artist table");

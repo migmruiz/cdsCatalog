@@ -26,7 +26,8 @@ public interface Disc extends Entity {
 	/*
 	 * 
 	 */
-	public Artist getMainArtist() throws RepositoryException, ExecutionException;
+	public Artist getMainArtist() throws RepositoryException,
+			ExecutionException;
 
 	/*
 	 * 

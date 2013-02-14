@@ -18,7 +18,7 @@ public class MySQLConnectionFactory {
 	 * Default constructor
 	 * 
 	 * @throws SQLException
-	 * @throws ClassNotFoundException 
+	 * @throws ClassNotFoundException
 	 */
 	public MySQLConnectionFactory() throws SQLException, ClassNotFoundException {
 		if (con == null || con.isClosed()) {

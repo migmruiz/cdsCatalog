@@ -26,12 +26,14 @@ public interface Artist extends Entity {
 	/*
 	 * 
 	 */
-	public Iterable<? extends Disc> getKnownDiscs() throws RepositoryException, ExecutionException;
+	public Iterable<? extends Disc> getKnownDiscs() throws RepositoryException,
+			ExecutionException;
 
 	/*
 	 * 
 	 */
-	public Iterable<? extends Disc> getKnownMainDiscs() throws RepositoryException;
+	public Iterable<? extends Disc> getKnownMainDiscs()
+			throws RepositoryException;
 
 	/*
 	 * 

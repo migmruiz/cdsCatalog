@@ -44,7 +44,7 @@ public class HibernateRepositoryTest {
 		artistRepository.initialize();
 	}
 
-//	@Test
+	// @Test
 	public void saveTest() throws Exception {
 		JPAArtist localArtist = new JPAArtist();
 		localArtist.setName("Antônio Carlos Jobim");
@@ -63,7 +63,8 @@ public class HibernateRepositoryTest {
 		discRepository.save(localDisc);
 	}
 
-	@Test @Before
+	@Test
+	@Before
 	public void getByIdTest() throws Exception {
 		disc = discRepository.getById(1L);
 		artist = artistRepository.getById(1L);
@@ -85,7 +86,7 @@ public class HibernateRepositoryTest {
 
 	@Test
 	public void allDiscsPrintingTest() throws Exception {
-		List<Disc> discs = new ArrayList<Disc>();
+		List<Disc> discs = new ArrayList<>();
 		boolean goOn = true;
 		try {
 			for (long i = 1L; goOn; i++) {

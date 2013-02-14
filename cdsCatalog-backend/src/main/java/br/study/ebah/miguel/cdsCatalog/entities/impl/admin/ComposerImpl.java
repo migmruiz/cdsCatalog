@@ -26,7 +26,7 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
  */
 public class ComposerImpl extends ArtistImpl implements Composer {
 
-	private final Set<Long> knownComposedSongsIds = new ConcurrentSkipListSet<Long>();
+	private final Set<Long> knownComposedSongsIds = new ConcurrentSkipListSet<>();
 
 	private final Repository<Song> songRepository;
 

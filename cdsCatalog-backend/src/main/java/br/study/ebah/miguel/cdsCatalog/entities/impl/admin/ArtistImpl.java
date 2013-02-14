@@ -29,9 +29,9 @@ import br.study.ebah.miguel.cdsCatalog.repo.RepositoryType;
 public class ArtistImpl extends AbstractEntity implements Artist, IsWritable {
 	private final String name;
 
-	private final Set<Long> knownSongsIds = new ConcurrentSkipListSet<Long>();
-	private final Set<Long> knownDiscsIds = new ConcurrentSkipListSet<Long>();
-	private final Set<Long> knownMainDiscsIds = new ConcurrentSkipListSet<Long>();
+	private final Set<Long> knownSongsIds = new ConcurrentSkipListSet<>();
+	private final Set<Long> knownDiscsIds = new ConcurrentSkipListSet<>();
+	private final Set<Long> knownMainDiscsIds = new ConcurrentSkipListSet<>();
 
 	private final Date birthday;
 

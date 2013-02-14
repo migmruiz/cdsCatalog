@@ -34,30 +34,30 @@ public class InMemoryRepositoryTest {
 		discRepository = RepositoryFactory.getRepository(Disc.class,
 				RepositoryType.InMemory);
 	}
-	
 
-	@Test @Before
+	@Test
+	@Before
 	public void saveTest() throws Exception {
 		ArtistImpl transientArtist = new ArtistImpl("Dave Grohl",
 				new LocalDate(1969, 1, 14).toDate(), RepositoryType.InMemory);
-		transientArtist.setId(1L); 
+		transientArtist.setId(1L);
 
-		DiscImpl transientDisc = new DiscImpl("Nevermind",
-				new LocalDate(1991, 9, 24).toDate(), RepositoryType.InMemory);
-		transientDisc.setId(1L); 
+		DiscImpl transientDisc = new DiscImpl("Nevermind", new LocalDate(1991,
+				9, 24).toDate(), RepositoryType.InMemory);
+		transientDisc.setId(1L);
 
 		transientDisc.asWritable(Artist.class).add(transientArtist);
 		transientDisc.setMain(transientArtist.getId());
-		
+
 		discRepository.save(transientDisc);
-		
+
 		transientArtist.asWritable(Disc.class).add(transientDisc);
 		transientArtist.setMain(transientDisc.getId());
 
 		RepositoryFactory.getRepository(Artist.class, RepositoryType.InMemory)
 				.save(transientArtist);
 	}
-	
+
 	@Test
 	public void constructorTest() throws Exception {
 		disc = discRepository.getById(1L);
@@ -77,7 +77,7 @@ public class InMemoryRepositoryTest {
 
 	@Test
 	public void allDiscsPrintingTest() throws Exception {
-		List<Disc> discs = new ArrayList<Disc>();
+		List<Disc> discs = new ArrayList<>();
 		boolean goOn = true;
 		try {
 			for (long i = 1L; goOn; i++) {

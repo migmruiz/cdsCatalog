@@ -52,6 +52,7 @@ public class JPASong implements Song {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#getId()
 	 */
+	@Override
 	public Long getId() {
 		return this.id;
 	}
@@ -65,6 +66,7 @@ public class JPASong implements Song {
 	 * 
 	 * @see br.study.ebah.miguel.cdsCatalog.entities.Entity#isTransient()
 	 */
+	@Override
 	public boolean isTransient() {
 		return false;
 	}

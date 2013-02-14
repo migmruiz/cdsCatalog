@@ -10,7 +10,7 @@ import org.apache.avalon.framework.activity.Initializable;
  * 
  */
 public interface Repository<T> extends AutoCloseable, Initializable {
-	
+
 	T getById(@Nonnull Long id) throws RepositoryException;
 
 	T save(T t) throws RepositoryException;

@@ -3,10 +3,10 @@
  */
 package br.study.ebah.miguel.cdsCatalog.entities.impl.admin;
 
+import br.study.ebah.miguel.cdsCatalog.entities.Entity;
+
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-
-import br.study.ebah.miguel.cdsCatalog.entities.Entity;
 
 /**
  * @author miguel

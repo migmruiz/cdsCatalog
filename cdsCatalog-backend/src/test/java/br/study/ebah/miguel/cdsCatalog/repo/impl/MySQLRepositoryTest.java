@@ -53,34 +53,35 @@ public class MySQLRepositoryTest {
 
 	@Test
 	public void saveTest() throws Exception {
-		Repository<Artist> artistRepository = RepositoryFactory.getRepository(
-				Artist.class, RepositoryType.MySQL);
+		try (Repository<Artist> artistRepository = RepositoryFactory
+				.getRepository(Artist.class, RepositoryType.MySQL)) {
 
-		DiscImpl transientDisc = new DiscImpl("Nevermind", new LocalDate(1991,
-				9, 24).toDate(), RepositoryType.MySQL);
-		Disc persistentDisc = discRepository.save(transientDisc);
-		transientDisc.setId(persistentDisc.getId());
+			DiscImpl transientDisc = new DiscImpl("Nevermind", new LocalDate(
+					1991, 9, 24).toDate(), RepositoryType.MySQL);
+			Disc persistentDisc = discRepository.save(transientDisc);
+			transientDisc.setId(persistentDisc.getId());
 
-		ArtistImpl transientArtist = new ArtistImpl("Dave Grohl",
-				new LocalDate(1969, 1, 14).toDate(), RepositoryType.MySQL);
-		Artist persistentArtist = artistRepository.save(transientArtist);
-		transientArtist.setId(persistentArtist.getId());
-		// TODO avoid the Artist duplicate
+			ArtistImpl transientArtist = new ArtistImpl("Dave Grohl",
+					new LocalDate(1969, 1, 14).toDate(), RepositoryType.MySQL);
+			Artist persistentArtist = artistRepository.save(transientArtist);
+			transientArtist.setId(persistentArtist.getId());
+			// TODO avoid the Artist duplicate
 
-		transientDisc.asWritable(Artist.class).add(transientArtist);
-		transientDisc.setMain(transientArtist.getId());
+			transientDisc.asWritable(Artist.class).add(transientArtist);
+			transientDisc.setMain(transientArtist.getId());
 
-		persistentDisc = discRepository.save(transientDisc);
+			persistentDisc = discRepository.save(transientDisc);
 
-		transientArtist.asWritable(Disc.class).add(persistentDisc);
-		transientArtist.setMain(persistentDisc.getId());
+			transientArtist.asWritable(Disc.class).add(persistentDisc);
+			transientArtist.setMain(persistentDisc.getId());
 
-		persistentArtist = artistRepository.save(transientArtist);
+			persistentArtist = artistRepository.save(transientArtist);
+		}
 	}
 
 	@Test
 	public void allDiscsPrintingTest() throws Exception {
-		List<Disc> discs = new ArrayList<Disc>();
+		List<Disc> discs = new ArrayList<>();
 		boolean goOn = true;
 		try {
 			for (long i = 1L; goOn && i < 10L; i++) {

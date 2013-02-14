@@ -42,7 +42,7 @@ public final class RepositoryFactory {
 					public Repository<T> call() throws Exception {
 						switch (store) {
 						case InMemory:
-							return new InMemoryRepository<T>();
+							return new InMemoryRepository<>();
 
 						case MySQL:
 							if (t == Artist.class) {
@@ -59,8 +59,8 @@ public final class RepositoryFactory {
 												+ " of MySQL RepositoryType");
 							}
 						case Hibernate:
-							return new HibernateRepository<T>(t);
-							
+							return new HibernateRepository<>(t);
+
 						case MySQL_C3P0:
 							if (t == Artist.class) {
 								return (Repository<T>) new MySQL_C3P0ArtistRepository();
@@ -85,7 +85,7 @@ public final class RepositoryFactory {
 					}
 				}));
 	}
-	
+
 	public static void destroy() {
 		repositoryCache.invalidateAll();
 	}

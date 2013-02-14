@@ -35,7 +35,8 @@ public interface Song extends Entity {
 	/*
 	 * 
 	 */
-	public Iterable<? extends Artist> getKnownArtists() throws RepositoryException;
+	public Iterable<? extends Artist> getKnownArtists()
+			throws RepositoryException;
 
 	/*
 	 * 

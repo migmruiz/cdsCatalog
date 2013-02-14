@@ -28,10 +28,10 @@ import com.google.common.base.Optional;
  */
 public class SongImpl extends AbstractEntity implements Song, IsWritable {
 	private final String name;
-	
-	private final Set<Long> knownDiscsIds = new ConcurrentSkipListSet<Long>();
-	private final Set<Long> knownArtistsIds = new ConcurrentSkipListSet<Long>();
-	
+
+	private final Set<Long> knownDiscsIds = new ConcurrentSkipListSet<>();
+	private final Set<Long> knownArtistsIds = new ConcurrentSkipListSet<>();
+
 	private Optional<Long> composerId = Optional.absent();
 	private final Date firstReleaseDate;
 
