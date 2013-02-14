@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 public class CdsDAO {
 
-	final Logger logger = LoggerFactory.getLogger(CdsDAO.class);
+	private static final Logger logger = LoggerFactory.getLogger(CdsDAO.class);
 	private final Repository<Disc> discRepository;
 
 	public CdsDAO(@Nonnull final Repository<Disc> discRepository) {
